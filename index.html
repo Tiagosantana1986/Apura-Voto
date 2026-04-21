@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApuraVoto · Simulador Eleitoral</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background-color: #0A0A0A; }
+    .gradient-brasil { background: linear-gradient(135deg, #22C55E 0%, #FBBF24 50%, #3B82F6 100%); }
+    .text-gradient { background: linear-gradient(135deg, #22C55E, #FBBF24, #3B82F6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // ==================== CONFIGURAÇÕES ====================
+    const COLORS = { primary: "#22C55E", secondary: "#FBBF24", accent: "#3B82F6", dark: "#0A0A0A" };
+    const LOGO_SIZE = { home: 80, header: 40 };
+
+    // Logo em SVG (sem dependência externa)
+    function Logo({ className = "", size = "home" }) {
+      const height = LOGO_SIZE[size] || 48;
+      return (
+        <div className={`flex items-center gap-3 ${className}`}>
+          <svg width={height} height={height} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="50" y="60" width="100" height="100" rx="8" fill="none" stroke="url(#gradLogo)" strokeWidth="3"/>
+            <path d="M70 40 L130 40 L130 60 L70 60 Z" fill="url(#gradLogo)"/>
+            <circle cx="100" cy="110" r="15" fill="url(#gradLogo)"/>
+            <defs>
+              <linearGradient id="gradLogo" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={COLORS.primary}/>
+                <stop offset="50%" stopColor={COLORS.secondary}/>
+                <stop offset="100%" stopColor={COLORS.accent}/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span className="text-3xl font-black tracking-tight">
+            <span style={{color: COLORS.primary}}>A</span>
+            <span style={{color: COLORS.secondary}}>p</span>
+            <span style={{color: COLORS.accent}}>u</span>
+            <span style={{color: COLORS.primary}}>r</span>
+            <span style={{color: COLORS.secondary}}>a</span>
+            <span className="text-white">Voto</span>
+          </span>
+        </div>
+      );
+    }
+
+    const parseNumberInput = (value) => {
+      if (value === '' || value === undefined) return 0;
+      const cleaned = value.replace(/^0+(?=\d)/, '');
+      return Number(cleaned) || 0;
+    };
+
+    const calcularQE = (votosValidos, vagas) => {
+      if (votosValidos <= 0 || vagas <= 0) return 0;
+      const qeExato = votosValidos / vagas;
+      const decimal = qeExato - Math.floor(qeExato);
+      return decimal <= 0.5 ? Math.floor(qeExato) : Math.ceil(qeExato);
+    };
+
+    // ==================== PÁGINA INICIAL ====================
+    function HomePage({ onNavigate }) {
+      return (
+        <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.dark, color: 'white' }}>
+          <main className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto text-center">
+            <Logo size="home" className="mb-8" />
+            <h1 className="text-4xl md:text-6xl font-black mb-4">Simule a distribuição<br />de vagas eleitorais</h1>
+            <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl">
+              Calcule o Quociente Eleitoral, Quociente Partidário e as sobras com as regras oficiais do TSE.
+            </p>
+            <button 
+              onClick={onNavigate} 
+              className="text-black font-bold text-lg px-10 py-5 rounded-xl shadow-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all transform hover:scale-105 gradient-brasil"
+            >
+              Gerar Simulação
+            </button>
+            <div className="mt-20 text-gray-500 text-sm flex items-center gap-1">
+              <span>Desenvolvido com</span><span className="text-red-500">❤️</span><span className="mx-1">🌍</span><span>para o Brasil</span>
+            </div>
+          </main>
+          <footer className="text-center text-gray-600 text-xs p-6 border-t border-gray-800">© 2026 ApuraVoto</footer>
+        </div>
+      );
+    }
+
+    // ==================== CALCULADORA ====================
+    function CalculadoraPage({ onBack }) {
+      const [votosValidosTotais, setVotosValidosTotais] = useState(0);
+      const [vagas, setVagas] = useState(0);
+      const [partidos, setPartidos] = useState([
+        { id: '1', nome: '', votos: 0, candidatos: [{ id: 'c1', nome: '', votos: 0 }] }
+      ]);
+      const [resultado, setResultado] = useState(null);
+
+      const qe = useMemo(() => calcularQE(votosValidosTotais, vagas), [votosValidosTotais, vagas]);
+      
+      const qps = useMemo(() => {
+        if (qe === 0) return [];
+        return partidos.map(p => ({
+          id: p.id,
+          nome: p.nome,
+          votos: p.votos,
+          qp: Math.floor(p.votos / qe)
+        }));
+      }, [partidos, qe]);
+
+      const adicionarPartido = () => {
+        const novoId = crypto.randomUUID?.() || Date.now().toString() + Math.random();
+        setPartidos([...partidos, { id: novoId, nome: '', votos: 0, candidatos: [{ id: crypto.randomUUID?.() || Date.now()+1, nome: '', votos: 0 }] }]);
+      };
+      const atualizarPartido = (partidoId, campo, valorStr) => {
+        const valor = campo === 'votos' ? parseNumberInput(valorStr) : valorStr;
+        setPartidos(partidos.map(p => p.id === partidoId ? { ...p, [campo]: valor } : p));
+      };
+      const removerPartido = (partidoId) => {
+        if (partidos.length === 1) return;
+        setPartidos(partidos.filter(p => p.id !== partidoId));
+      };
+      const adicionarCandidato = (partidoId) => {
+        setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: [...p.candidatos, { id: crypto.randomUUID?.() || Date.now()+Math.random(), nome: '', votos: 0 }] } : p));
+      };
+      const atualizarCandidato = (partidoId, candidatoId, campo, valorStr) => {
+        const valor = campo === 'votos' ? parseNumberInput(valorStr) : valorStr;
+        setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: p.candidatos.map(c => c.id === candidatoId ? { ...c, [campo]: valor } : c) } : p));
+      };
+      const removerCandidato = (partidoId, candidatoId) => {
+        setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: p.candidatos.filter(c => c.id !== candidatoId) } : p));
+      };
+
+      const calcular = () => {
+        if (votosValidosTotais <= 0) return alert('Votos válidos totais deve ser maior que zero.');
+        if (vagas <= 0) return alert('Número de vagas deve ser maior que zero.');
+        if (qe === 0) return alert('Quociente Eleitoral não pôde ser calculado.');
+
+        const desempenhoMinimo = Math.ceil(qe * 0.1);
+        let distribuicao = partidos.map(p => ({ ...p, vagas: Math.floor(p.votos / qe) }));
+        let vagasRestantes = vagas - distribuicao.reduce((acc, p) => acc + p.vagas, 0);
+
+        while (vagasRestantes > 0) {
+          let melhorMedia = -1, partidoIndex = -1;
+          distribuicao.forEach((p, idx) => {
+            const media = p.votos / (p.vagas + 1);
+            if (media > melhorMedia) { melhorMedia = media; partidoIndex = idx; }
+          });
+          if (partidoIndex === -1) break;
+          distribuicao[partidoIndex].vagas += 1;
+          vagasRestantes--;
+        }
+
+        const eleitos = [];
+        distribuicao.forEach(partido => {
+          const candidatosOrdenados = [...partido.candidatos].sort((a,b) => b.votos - a.votos);
+          let vagasPreenchidas = 0;
+          for (const c of candidatosOrdenados) {
+            if (vagasPreenchidas >= partido.vagas) break;
+            if (c.votos >= desempenhoMinimo) {
+              eleitos.push({ ...c, partido: partido.nome || 'Sem nome' });
+              vagasPreenchidas++;
+            }
+          }
+        });
+
+        setResultado({
+          qe,
+          desempenhoMinimo,
+          distribuicao: distribuicao.map(p => ({ nome: p.nome || 'Sem nome', votos: p.votos, vagas: p.vagas })),
+          eleitos,
+          vagasNaoPreenchidas: vagas - eleitos.length,
+        });
+      };
+
+      return (
+        <div className="min-h-screen text-white flex flex-col" style={{ backgroundColor: COLORS.dark }}>
+          <header className="bg-gray-900/50 backdrop-blur-sm p-4 border-b border-gray-800 flex items-center gap-4 sticky top-0 z-10">
+            <button onClick={onBack} className="text-gray-400 hover:text-white transition">← Voltar</button>
+            <Logo size="header" />
+          </header>
+          <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-900/80 backdrop-blur-sm p-5 rounded-xl border border-gray-800">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-300">Votos Válidos Totais</label>
+                <input type="text" inputMode="numeric" value={votosValidosTotais === 0 ? '' : votosValidosTotais} 
+                  onChange={(e) => setVotosValidosTotais(parseNumberInput(e.target.value))}
+                  className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="Ex: 58119" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-300">Vagas Disponíveis</label>
+                <input type="text" inputMode="numeric" value={vagas === 0 ? '' : vagas} 
+                  onChange={(e) => setVagas(parseNumberInput(e.target.value))}
+                  className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="Ex: 15" />
+              </div>
+            </div>
+
+            <div className="bg-gray-900/80 backdrop-blur-sm p-5 rounded-xl border border-gray-800">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <span style={{color: COLORS.primary}}>📊 Quocientes</span>
+                <span className="text-xs font-normal text-gray-400">(atualizados em tempo real)</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-black/50 p-3 rounded-lg border border-gray-700">
+                  <span className="text-gray-400">Quociente Eleitoral (QE):</span>
+                  <span className="text-2xl font-bold ml-2" style={{color: COLORS.secondary}}>{qe || '-'}</span>
+                  {qe > 0 && <div className="text-xs text-gray-500 mt-1">10% do QE = {Math.ceil(qe * 0.1)} votos</div>}
+                </div>
+                <div className="bg-black/50 p-3 rounded-lg border border-gray-700">
+                  <span className="text-gray-400">Vagas a preencher:</span>
+                  <span className="text-2xl font-bold ml-2 text-white">{vagas || '-'}</span>
+                </div>
+              </div>
+              {qps.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-medium mb-2 text-gray-300">Quociente Partidário (QP) por Partido</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-sm">
+                      <thead><tr className="border-b border-gray-700 text-gray-400"><th className="py-2">Partido</th><th className="py-2">Votos</th><th className="py-2">QP</th></tr></thead>
+                      <tbody>
+                        {qps.map(p => <tr key={p.id} className="border-b border-gray-800"><td className="py-2">{p.nome || 'Sem nome'}</td><td className="py-2">{p.votos}</td><td className="py-2 font-bold" style={{color: COLORS.primary}}>{p.qp}</td></tr>)}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {partidos.map((partido, index) => (
+              <div key={partido.id} className="bg-gray-900/80 backdrop-blur-sm p-5 rounded-xl border border-gray-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold" style={{color: COLORS.primary}}>Partido {index + 1}</h2>
+                  {partidos.length > 1 && <button onClick={() => removerPartido(partido.id)} className="text-red-400 hover:text-red-300 text-sm">Remover</button>}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div><label className="block text-sm text-gray-400 mb-1">Nome do Partido</label><input type="text" placeholder="Ex: PSD, PP, MDB, PSB" value={partido.nome} onChange={(e) => atualizarPartido(partido.id, 'nome', e.target.value)} className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" /></div>
+                  <div><label className="block text-sm text-gray-400 mb-1">Votos Totais do Partido</label><input type="text" inputMode="numeric" value={partido.votos === 0 ? '' : partido.votos} onChange={(e) => atualizarPartido(partido.id, 'votos', e.target.value)} className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="0" /></div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold">Candidatos</h3>
+                    <button onClick={() => adicionarCandidato(partido.id)} className="text-white px-4 py-1.5 rounded-lg text-sm transition" style={{backgroundColor: COLORS.accent}}>+ Adicionar Candidato</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mb-2 text-sm font-medium text-gray-400 border-b border-gray-800 pb-2"><div>Nome</div><div>Votos</div></div>
+                  {partido.candidatos.map((candidato) => (
+                    <div key={candidato.id} className="grid grid-cols-2 gap-4 mb-3 items-center">
+                      <input type="text" placeholder="Nome" value={candidato.nome} onChange={(e) => atualizarCandidato(partido.id, candidato.id, 'nome', e.target.value)} className="p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" />
+                      <div className="flex items-center gap-2">
+                        <input type="text" inputMode="numeric" value={candidato.votos === 0 ? '' : candidato.votos} onChange={(e) => atualizarCandidato(partido.id, candidato.id, 'votos', e.target.value)} className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="0" />
+                        {partido.candidatos.length > 1 && <button onClick={() => removerCandidato(partido.id, candidato.id)} className="text-red-500 hover:text-red-400 text-xl">✕</button>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <button onClick={adicionarPartido} className="w-full text-white font-medium py-3.5 rounded-xl transition" style={{backgroundColor: COLORS.accent}}>+ Adicionar Novo Partido</button>
+            <button onClick={calcular} className="w-full text-black font-bold py-4 rounded-xl shadow-lg transition gradient-brasil">Calcular Resultado Completo (Sobras e Eleitos)</button>
+
+            {resultado && (
+              <div className="bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-gray-800 mt-6">
+                <h3 className="text-xl font-bold mb-4 text-gradient">Resultado da Simulação</h3>
+                <div className="mb-4 space-y-1"><p><span className="font-semibold">Quociente Eleitoral (QE):</span> {resultado.qe}</p><p><span className="font-semibold">Desempenho mínimo (10% do QE):</span> {resultado.desempenhoMinimo} votos</p></div>
+                <div className="mb-4"><h4 className="font-semibold mb-2">Distribuição de Vagas por Partido</h4><table className="w-full text-left border-collapse"><thead><tr className="border-b border-gray-700"><th className="py-2">Partido</th><th className="py-2">Votos</th><th className="py-2">Vagas</th></tr></thead><tbody>{resultado.distribuicao.map((p,i) => <tr key={i} className="border-b border-gray-800"><td className="py-2">{p.nome}</td><td className="py-2">{p.votos}</td><td className="py-2">{p.vagas}</td></tr>)}</tbody></table></div>
+                <div><h4 className="font-semibold mb-2">Candidatos Eleitos</h4>{resultado.eleitos.length === 0 ? <p>Nenhum candidato eleito.</p> : <table className="w-full text-left border-collapse"><thead><tr className="border-b border-gray-700"><th className="py-2">Candidato</th><th className="py-2">Partido</th><th className="py-2">Votos</th></tr></thead><tbody>{resultado.eleitos.map((c,i) => <tr key={i} className="border-b border-gray-800"><td className="py-2">{c.nome}</td><td className="py-2">{c.partido}</td><td className="py-2">{c.votos}</td></tr>)}</tbody></table>}{resultado.vagasNaoPreenchidas > 0 && <p className="mt-3 text-yellow-500">⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s) por falta de candidatos com 10% do QE.</p>}</div>
+              </div>
+            )}
+          </main>
+          <footer className="text-center text-gray-600 text-xs p-4 border-t border-gray-800">© 2026 ApuraVoto · Regras oficiais (TSE/STF)</footer>
+        </div>
+      );
+    }
+
+    function App() {
+      const [pagina, setPagina] = useState('home');
+      return <>{pagina === 'home' ? <HomePage onNavigate={() => setPagina('calculadora')} /> : <CalculadoraPage onBack={() => setPagina('home')} />}</>;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
