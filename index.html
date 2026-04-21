@@ -112,52 +112,53 @@
       margin-bottom: 4px;
     }
 
-    /* Estilos para o PDF (serão aplicados na div temporária) */
+    /* Estilos para o PDF (tamanho de fonte reduzido) */
     .pdf-report {
       background: white;
       color: #1e293b;
-      padding: 32px;
+      padding: 24px;
       border-radius: 8px;
       width: 800px;
       margin: 0 auto;
+      font-size: 13px;
     }
     .pdf-report h2 {
       color: #0b1a2b;
-      font-size: 28px;
-      margin-bottom: 16px;
+      font-size: 22px;
+      margin-bottom: 12px;
       border-bottom: 2px solid #22c55e;
-      padding-bottom: 12px;
+      padding-bottom: 8px;
     }
     .pdf-report h3 {
       color: #0b1a2b;
-      font-size: 20px;
-      margin: 24px 0 12px;
+      font-size: 18px;
+      margin: 18px 0 8px;
     }
     .pdf-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 16px 0;
-      font-size: 14px;
+      margin: 12px 0;
+      font-size: 12px;
     }
     .pdf-table th {
       background: #f1f5f9;
       color: #0b1a2b;
       font-weight: 600;
-      padding: 12px 8px;
+      padding: 8px 6px;
       text-align: left;
       border-bottom: 2px solid #cbd5e1;
     }
     .pdf-table td {
-      padding: 10px 8px;
+      padding: 6px 6px;
       border-bottom: 1px solid #e2e8f0;
     }
     .pdf-footer {
-      margin-top: 32px;
+      margin-top: 24px;
       text-align: center;
       color: #64748b;
-      font-size: 12px;
+      font-size: 10px;
       border-top: 1px solid #cbd5e1;
-      padding-top: 16px;
+      padding-top: 12px;
     }
   </style>
 </head>
@@ -335,7 +336,7 @@
         } catch (e) { console.error(e); alert('Erro inesperado.'); }
       };
 
-      // GERA PDF PROFISSIONAL COM TODOS OS DADOS
+      // GERA PDF COM MÚLTIPLAS PÁGINAS E FONTE REDUZIDA
       const gerarPDF = () => {
         if (!resultado) return alert('Primeiro calcule o resultado.');
 
@@ -380,17 +381,38 @@
           </div>
         `;
 
-        // Captura com html2canvas
+        // Captura com html2canvas e divide em múltiplas páginas
         html2canvas(reportDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
           document.body.removeChild(reportDiv);
-          const imgData = canvas.toDataURL('image/png');
+          
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
           
-          // Abre em nova aba
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const margin = 10; // mm
+          
+          const imgWidth = pdfWidth - 2 * margin;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          let heightLeft = imgHeight;
+          let position = margin;
+          let page = 1;
+          
+          // Adiciona a primeira página
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, position, imgWidth, imgHeight);
+          heightLeft -= (pdfHeight - 2 * margin);
+          
+          // Adiciona páginas adicionais se necessário
+          while (heightLeft > 0) {
+            position = margin - (page * (pdfHeight - 2 * margin));
+            pdf.addPage();
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, position, imgWidth, imgHeight);
+            heightLeft -= (pdfHeight - 2 * margin);
+            page++;
+          }
+          
+          // Abre o PDF em nova aba
           const pdfBlob = pdf.output('blob');
           const blobUrl = URL.createObjectURL(pdfBlob);
           window.open(blobUrl, '_blank');
@@ -405,7 +427,6 @@
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b1a2b' }}>
           <Header onBack={onBack} showBack={true} showProfile={false} />
           <main style={{ flex: 1, maxWidth: '1100px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
-            {/* ... (mesmo conteúdo da calculadora, sem alterações) ... */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
               <div className="card">
                 <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontWeight: 500 }}>Votos Válidos Totais</label>
