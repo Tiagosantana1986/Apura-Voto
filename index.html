@@ -68,7 +68,7 @@
       font-size: 13px;
       color: #94a3b8;
     }
-    /* Créditos alinhados profissionalmente */
+    /* Créditos */
     .credits-container {
       display: flex;
       flex-direction: column;
@@ -105,6 +105,12 @@
       color: white;
       font-weight: 700;
       font-size: 18px;
+    }
+    .credit-header {
+      color: #94a3b8;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -178,7 +184,7 @@
       );
     }
 
-    // ==================== PÁGINA INICIAL (CRÉDITOS CORRIGIDOS E PROFISSIONAIS) ====================
+    // ==================== PÁGINA INICIAL (COM "DESENVOLVIDO POR:") ====================
     function HomePage({ onNavigate }) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -192,9 +198,10 @@
               Gerar Simulação
             </button>
 
-            {/* Créditos com design profissional e alinhado */}
+            {/* Créditos com "Desenvolvido por:" */}
             <div className="credits-container">
               <div className="credits-card">
+                <div className="credit-header">Desenvolvido por:</div>
                 <div className="credit-item">
                   <span className="credit-icon">👤</span>
                   <span className="credit-name">Tiago Sant'ana</span>
