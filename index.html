@@ -111,24 +111,53 @@
       letter-spacing: 0.5px;
       margin-bottom: 4px;
     }
-    /* Estilo para o conteúdo do PDF (será renderizado com fundo branco e texto escuro) */
-    .pdf-content {
+
+    /* Estilos para o PDF (serão aplicados na div temporária) */
+    .pdf-report {
       background: white;
       color: #1e293b;
-      padding: 24px;
-      border-radius: 16px;
+      padding: 32px;
+      border-radius: 8px;
+      width: 800px;
+      margin: 0 auto;
     }
-    .pdf-content h3, .pdf-content h4 {
+    .pdf-report h2 {
       color: #0b1a2b;
+      font-size: 28px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #22c55e;
+      padding-bottom: 12px;
     }
-    .pdf-content table {
-      color: #1e293b;
+    .pdf-report h3 {
+      color: #0b1a2b;
+      font-size: 20px;
+      margin: 24px 0 12px;
     }
-    .pdf-content th {
-      border-bottom: 1px solid #cbd5e1;
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
     }
-    .pdf-content td {
+    .pdf-table th {
+      background: #f1f5f9;
+      color: #0b1a2b;
+      font-weight: 600;
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 2px solid #cbd5e1;
+    }
+    .pdf-table td {
+      padding: 10px 8px;
       border-bottom: 1px solid #e2e8f0;
+    }
+    .pdf-footer {
+      margin-top: 32px;
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 16px;
     }
   </style>
 </head>
@@ -306,21 +335,54 @@
         } catch (e) { console.error(e); alert('Erro inesperado.'); }
       };
 
-      // GERA PDF (abre em nova aba, fundo branco)
+      // GERA PDF PROFISSIONAL COM TODOS OS DADOS
       const gerarPDF = () => {
-        const el = document.getElementById('resultado-pdf');
-        if(!el) return;
-        // Força fundo branco para captura
-        const originalBg = el.style.backgroundColor;
-        const originalColor = el.style.color;
-        el.style.backgroundColor = '#ffffff';
-        el.style.color = '#1e293b';
-        
-        html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-          // Restaura estilo original
-          el.style.backgroundColor = originalBg;
-          el.style.color = originalColor;
+        if (!resultado) return alert('Primeiro calcule o resultado.');
+
+        // Cria uma div temporária com o conteúdo do relatório
+        const reportDiv = document.createElement('div');
+        reportDiv.className = 'pdf-report';
+        reportDiv.style.position = 'absolute';
+        reportDiv.style.left = '-9999px';
+        reportDiv.style.top = '0';
+        reportDiv.style.backgroundColor = 'white';
+        reportDiv.style.color = '#1e293b';
+        reportDiv.style.fontFamily = 'Inter, sans-serif';
+        document.body.appendChild(reportDiv);
+
+        // Preenche o conteúdo
+        reportDiv.innerHTML = `
+          <h2>ApuraVoto - Resultado da Simulação</h2>
+          <p style="margin-bottom: 16px;"><strong>Quociente Eleitoral (QE):</strong> ${resultado.qe} | <strong>10% QE:</strong> ${resultado.min10} votos | <strong>20% QE (2ª fase):</strong> ${resultado.min20} votos</p>
           
+          <h3>Distribuição de Vagas por Partido</h3>
+          <table class="pdf-table">
+            <thead><tr><th>Partido</th><th>Votos</th><th>Vagas</th></tr></thead>
+            <tbody>
+              ${resultado.distribuicao.map(p => `<tr><td>${p.nome}</td><td>${p.votos}</td><td>${p.vagas}</td></tr>`).join('')}
+            </tbody>
+          </table>
+
+          <h3>Candidatos Eleitos</h3>
+          ${resultado.eleitos.length === 0 ? '<p>Nenhum candidato eleito.</p>' : `
+            <table class="pdf-table">
+              <thead><tr><th>Candidato</th><th>Partido</th><th>Votos</th><th>Forma de Eleição</th></tr></thead>
+              <tbody>
+                ${resultado.eleitos.map(c => `<tr><td>${c.nome}</td><td>${c.partido}</td><td>${c.votos}</td><td>${c.fase}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          `}
+          ${resultado.vagasNaoPreenchidas > 0 ? `<p style="color: #b45309;">⚠️ ${resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s) por falta de candidatos aptos.</p>` : ''}
+
+          <div class="pdf-footer">
+            © 2026 ApuraVoto · Simulação baseada nas regras oficiais (TSE/STF)<br/>
+            Desenvolvido por Tiago Sant'ana · (43) 99984-1190
+          </div>
+        `;
+
+        // Captura com html2canvas
+        html2canvas(reportDiv, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+          document.body.removeChild(reportDiv);
           const imgData = canvas.toDataURL('image/png');
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -328,15 +390,14 @@
           const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
           pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
           
-          // Abre o PDF em nova aba (blob URL)
+          // Abre em nova aba
           const pdfBlob = pdf.output('blob');
           const blobUrl = URL.createObjectURL(pdfBlob);
           window.open(blobUrl, '_blank');
-        }).catch(e => { 
-          el.style.backgroundColor = originalBg;
-          el.style.color = originalColor;
-          console.error(e); 
-          alert('Erro ao gerar PDF.'); 
+        }).catch(e => {
+          document.body.removeChild(reportDiv);
+          console.error(e);
+          alert('Erro ao gerar PDF.');
         });
       };
 
@@ -344,6 +405,7 @@
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b1a2b' }}>
           <Header onBack={onBack} showBack={true} showProfile={false} />
           <main style={{ flex: 1, maxWidth: '1100px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
+            {/* ... (mesmo conteúdo da calculadora, sem alterações) ... */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
               <div className="card">
                 <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontWeight: 500 }}>Votos Válidos Totais</label>
@@ -442,7 +504,7 @@
             <button onClick={calcular} className="btn-primary" style={{ width: '100%', padding: '18px', fontSize: '18px' }}>Calcular Resultado Completo</button>
 
             {resultado && (
-              <div id="resultado-pdf" className="card" style={{ marginTop: '32px' }}>
+              <div className="card" style={{ marginTop: '32px' }}>
                 <h3 className="text-gradient" style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>Resultado da Simulação</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', marginBottom: '28px', color: '#cbd5e1' }}>
                   <div><span style={{ fontWeight: 600, color: 'white' }}>QE:</span> {resultado.qe}</div>
