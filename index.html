@@ -16,6 +16,59 @@
     body { background-color: #0b1a2b; color: #fff; }
     .gradient-brasil { background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6); }
     .text-gradient { background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Classes utilitárias para layout consistente */
+    .card {
+      background: #1f2a3a;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #2d3a4a;
+    }
+    .input-field {
+      width: 100%;
+      padding: 12px 16px;
+      background: #0b1a2b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #000;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: #3b82f6;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-weight: 500;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #2563eb; }
+    .badge {
+      background: #0b1a2b;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
   </style>
 </head>
 <body>
@@ -78,7 +131,7 @@
 
     function Header({ onBack, showBack = false, showProfile = true }) {
       return (
-        <header style={{ background: '#1f2a3a', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <header style={{ background: '#1f2a3a', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #2d3a4a' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             {showBack && <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#cbd5e1', fontSize: '16px', cursor: 'pointer' }}>← Voltar</button>}
             <LogoCompleto />
@@ -88,7 +141,7 @@
       );
     }
 
-    // ==================== PÁGINA INICIAL (EXATAMENTE COMO SOLICITADO) ====================
+    // ==================== PÁGINA INICIAL ====================
     function HomePage({ onNavigate }) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -112,7 +165,7 @@
       );
     }
 
-    // ==================== CALCULADORA (REDESENHADA E ALINHADA) ====================
+    // ==================== CALCULADORA (DESIGN PROFISSIONAL) ====================
     function CalculadoraPage({ onBack }) {
       const [votosValidosTotais, setVotosValidosTotais] = useState('');
       const [vagas, setVagas] = useState('');
@@ -195,43 +248,43 @@
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b1a2b' }}>
           <Header onBack={onBack} showBack={true} showProfile={false} />
           <main style={{ flex: 1, maxWidth: '1100px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
-            {/* Campos principais */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
-              <div style={{ background: '#1f2a3a', padding: '20px', borderRadius: '16px' }}>
+            {/* Linha 1: Votos Válidos e Vagas */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+              <div className="card">
                 <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontWeight: 500 }}>Votos Válidos Totais</label>
-                <input type="text" inputMode="numeric" value={votosValidosTotais} onChange={(e) => setVotosValidosTotais(e.target.value)} style={{ width: '100%', padding: '14px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '10px', color: 'white', fontSize: '16px' }} placeholder="Ex: 58119" />
+                <input type="text" inputMode="numeric" value={votosValidosTotais} onChange={(e) => setVotosValidosTotais(e.target.value)} className="input-field" placeholder="Ex: 58119" />
               </div>
-              <div style={{ background: '#1f2a3a', padding: '20px', borderRadius: '16px' }}>
+              <div className="card">
                 <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontWeight: 500 }}>Vagas Disponíveis</label>
-                <input type="text" inputMode="numeric" value={vagas} onChange={(e) => setVagas(e.target.value)} style={{ width: '100%', padding: '14px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '10px', color: 'white', fontSize: '16px' }} placeholder="Ex: 15" />
+                <input type="text" inputMode="numeric" value={vagas} onChange={(e) => setVagas(e.target.value)} className="input-field" placeholder="Ex: 15" />
               </div>
             </div>
 
             {/* Painel de Quocientes */}
-            <div style={{ background: '#1f2a3a', padding: '24px', borderRadius: '16px', marginBottom: '32px' }}>
-              <h3 style={{ fontSize: '22px', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#22c55e' }}>📊 Quocientes</span>
-                <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: 400 }}>atualizados em tempo real</span>
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: qe > 0 ? '24px' : '0' }}>
-                <div style={{ background: '#0b1a2b', padding: '18px', borderRadius: '12px' }}>
-                  <span style={{ color: '#94a3b8' }}>Quociente Eleitoral (QE):</span>
-                  <span style={{ fontSize: '28px', fontWeight: 'bold', marginLeft: '12px', color: '#eab308' }}>{qe || '-'}</span>
-                  {qe > 0 && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>10% do QE = {Math.ceil(qe * 0.1)} votos</div>}
+            <div className="card" style={{ marginBottom: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#22c55e' }}>📊 Quocientes</h3>
+                <span className="badge">atualizados em tempo real</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: qe > 0 ? '28px' : '0' }}>
+                <div style={{ background: '#0b1a2b', padding: '20px', borderRadius: '12px' }}>
+                  <div style={{ color: '#94a3b8', marginBottom: '6px' }}>Quociente Eleitoral (QE)</div>
+                  <div style={{ fontSize: '32px', fontWeight: 700, color: '#eab308' }}>{qe || '—'}</div>
+                  {qe > 0 && <div style={{ fontSize: '14px', color: '#64748b', marginTop: '8px' }}>10% = {Math.ceil(qe * 0.1)} votos</div>}
                 </div>
-                <div style={{ background: '#0b1a2b', padding: '18px', borderRadius: '12px' }}>
-                  <span style={{ color: '#94a3b8' }}>Vagas a preencher:</span>
-                  <span style={{ fontSize: '28px', fontWeight: 'bold', marginLeft: '12px' }}>{vagasNum || '-'}</span>
+                <div style={{ background: '#0b1a2b', padding: '20px', borderRadius: '12px' }}>
+                  <div style={{ color: '#94a3b8', marginBottom: '6px' }}>Vagas a preencher</div>
+                  <div style={{ fontSize: '32px', fontWeight: 700 }}>{vagasNum || '—'}</div>
                 </div>
               </div>
 
               {qe > 0 && (
                 <div>
-                  <h4 style={{ color: '#cbd5e1', marginBottom: '12px', fontWeight: 500 }}>Quociente Partidário (QP) por Partido</h4>
+                  <h4 style={{ color: '#cbd5e1', fontWeight: 500, marginBottom: '12px' }}>Quociente Partidário (QP) por Partido</h4>
                   <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '15px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
-                        <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8' }}>
+                        <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '14px' }}>
                           <th style={{ padding: '12px 0', textAlign: 'left', fontWeight: 500 }}>Partido</th>
                           <th style={{ padding: '12px 0', textAlign: 'left', fontWeight: 500 }}>Votos</th>
                           <th style={{ padding: '12px 0', textAlign: 'left', fontWeight: 500 }}>QP</th>
@@ -240,9 +293,9 @@
                       <tbody>
                         {partidos.map(p => { const v = parseNumberInput(p.votos); return (
                           <tr key={p.id} style={{ borderBottom: '1px solid #1e293b' }}>
-                            <td style={{ padding: '10px 0' }}>{p.nome || 'SEM NOME'}</td>
+                            <td style={{ padding: '10px 0' }}>{p.nome || '—'}</td>
                             <td style={{ padding: '10px 0' }}>{v}</td>
-                            <td style={{ padding: '10px 0', fontWeight: 'bold', color: '#22c55e' }}>{Math.floor(v / qe)}</td>
+                            <td style={{ padding: '10px 0', fontWeight: 700, color: '#22c55e' }}>{Math.floor(v / qe)}</td>
                           </tr>
                         )})}
                       </tbody>
@@ -255,35 +308,35 @@
             {/* Lista de Partidos */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
               {partidos.map((p, idx) => (
-                <div key={p.id} style={{ background: '#1f2a3a', padding: '24px', borderRadius: '16px' }}>
+                <div key={p.id} className="card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#22c55e' }}>Partido {idx+1}</h2>
-                    {partidos.length > 1 && <button onClick={() => removerPartido(p.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '15px', cursor: 'pointer', fontWeight: 500 }}>Remover</button>}
+                    <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#22c55e' }}>Partido {idx+1}</h2>
+                    {partidos.length > 1 && <button onClick={() => removerPartido(p.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '14px', cursor: 'pointer' }}>Remover</button>}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '6px', color: '#94a3b8', fontSize: '14px' }}>Nome do Partido</label>
-                      <input type="text" value={p.nome} onChange={(e) => atualizarPartido(p.id, 'nome', e.target.value)} style={{ width: '100%', padding: '14px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '10px', color: 'white', textTransform: 'uppercase' }} placeholder="Ex: PSD" />
+                      <input type="text" value={p.nome} onChange={(e) => atualizarPartido(p.id, 'nome', e.target.value)} className="input-field" placeholder="Ex: PSD" style={{ textTransform: 'uppercase' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '6px', color: '#94a3b8', fontSize: '14px' }}>Votos Totais</label>
-                      <input type="text" inputMode="numeric" value={p.votos} onChange={(e) => atualizarPartido(p.id, 'votos', e.target.value)} style={{ width: '100%', padding: '14px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '10px', color: 'white' }} placeholder="0" />
+                      <input type="text" inputMode="numeric" value={p.votos} onChange={(e) => atualizarPartido(p.id, 'votos', e.target.value)} className="input-field" placeholder="0" />
                     </div>
                   </div>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                      <h3 style={{ fontWeight: 600, fontSize: '18px' }}>Candidatos</h3>
-                      <button onClick={() => adicionarCandidato(p.id)} style={{ background: '#3b82f6', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>+ Adicionar Candidato</button>
+                      <h3 style={{ fontWeight: 600, fontSize: '16px' }}>Candidatos</h3>
+                      <button onClick={() => adicionarCandidato(p.id)} className="btn-secondary">+ Adicionar</button>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px', color: '#94a3b8', fontSize: '14px', borderBottom: '1px solid #334155', paddingBottom: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px', color: '#94a3b8', fontSize: '13px', borderBottom: '1px solid #334155', paddingBottom: '8px' }}>
                       <div>Nome</div><div>Votos</div>
                     </div>
                     {p.candidatos.map(c => (
-                      <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'center' }}>
-                        <input type="text" value={c.nome} onChange={(e) => atualizarCandidato(p.id, c.id, 'nome', e.target.value)} style={{ padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '10px', color: 'white', textTransform: 'uppercase' }} placeholder="Nome" />
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                          <input type="text" inputMode="numeric" value={c.votos} onChange={(e) => atualizarCandidato(p.id, c.id, 'votos', e.target.value)} style={{ flex: 1, padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '10px', color: 'white' }} placeholder="0" />
-                          {p.candidatos.length > 1 && <button onClick={() => removerCandidato(p.id, c.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '20px', cursor: 'pointer' }}>✕</button>}
+                      <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px', alignItems: 'center' }}>
+                        <input type="text" value={c.nome} onChange={(e) => atualizarCandidato(p.id, c.id, 'nome', e.target.value)} className="input-field" placeholder="Nome" style={{ textTransform: 'uppercase' }} />
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input type="text" inputMode="numeric" value={c.votos} onChange={(e) => atualizarCandidato(p.id, c.id, 'votos', e.target.value)} className="input-field" placeholder="0" style={{ flex: 1 }} />
+                          {p.candidatos.length > 1 && <button onClick={() => removerCandidato(p.id, c.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '18px', cursor: 'pointer' }}>✕</button>}
                         </div>
                       </div>
                     ))}
@@ -292,16 +345,16 @@
               ))}
             </div>
 
-            <button onClick={adicionarPartido} style={{ width: '100%', padding: '16px', background: '#3b82f6', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 600, fontSize: '16px', cursor: 'pointer', marginBottom: '20px' }}>+ Adicionar Novo Partido</button>
-            <button onClick={calcular} className="gradient-brasil" style={{ width: '100%', padding: '18px', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', color: '#000' }}>Calcular Resultado Completo</button>
+            <button onClick={adicionarPartido} className="btn-secondary" style={{ width: '100%', padding: '16px', marginBottom: '20px', fontSize: '16px' }}>+ Adicionar Novo Partido</button>
+            <button onClick={calcular} className="btn-primary" style={{ width: '100%', padding: '18px', fontSize: '18px' }}>Calcular Resultado Completo</button>
 
             {resultado && (
-              <div id="resultado-pdf" style={{ background: '#1f2a3a', padding: '28px', borderRadius: '16px', marginTop: '32px' }}>
-                <h3 className="text-gradient" style={{ fontSize: '26px', fontWeight: 700, marginBottom: '24px' }}>Resultado da Simulação</h3>
-                <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
-                  <div><span style={{ fontWeight: 600 }}>Quociente Eleitoral (QE):</span> {resultado.qe}</div>
-                  <div><span style={{ fontWeight: 600 }}>10% QE:</span> {resultado.min10} votos</div>
-                  <div><span style={{ fontWeight: 600 }}>20% QE (2ª fase):</span> {resultado.min20} votos</div>
+              <div id="resultado-pdf" className="card" style={{ marginTop: '32px' }}>
+                <h3 className="text-gradient" style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>Resultado da Simulação</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', marginBottom: '28px', color: '#cbd5e1' }}>
+                  <div><span style={{ fontWeight: 600, color: 'white' }}>QE:</span> {resultado.qe}</div>
+                  <div><span style={{ fontWeight: 600, color: 'white' }}>10% QE:</span> {resultado.min10} votos</div>
+                  <div><span style={{ fontWeight: 600, color: 'white' }}>20% QE (2ª fase):</span> {resultado.min20} votos</div>
                 </div>
                 <div style={{ marginBottom: '28px' }}>
                   <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px' }}>Distribuição de Vagas por Partido</h4>
@@ -314,14 +367,14 @@
                   <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px' }}>Candidatos Eleitos</h4>
                   {resultado.eleitos.length === 0 ? <p>Nenhum candidato eleito.</p> : (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '12px 0', textAlign: 'left' }}>Candidato</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Forma de Eleição</th></tr></thead>
+                      <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '12px 0', textAlign: 'left' }}>Candidato</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Forma</th></tr></thead>
                       <tbody>{resultado.eleitos.map((c,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '10px 0' }}>{c.nome}</td><td>{c.partido}</td><td>{c.votos}</td><td>{c.fase}</td></tr>)}</tbody>
                     </table>
                   )}
-                  {resultado.vagasNaoPreenchidas > 0 && <p style={{ marginTop: '20px', color: '#eab308', fontWeight: 500 }}>⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s) por falta de candidatos aptos.</p>}
+                  {resultado.vagasNaoPreenchidas > 0 && <p style={{ marginTop: '20px', color: '#eab308' }}>⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s).</p>}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
-                  <button onClick={gerarPDF} style={{ background: '#2563eb', border: 'none', color: 'white', padding: '12px 28px', borderRadius: '10px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px' }}>📄 Baixar PDF</button>
+                  <button onClick={gerarPDF} className="btn-secondary" style={{ padding: '12px 28px' }}>📄 Baixar PDF</button>
                 </div>
               </div>
             )}
