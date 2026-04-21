@@ -68,6 +68,44 @@
       font-size: 13px;
       color: #94a3b8;
     }
+    /* Créditos alinhados profissionalmente */
+    .credits-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 80px;
+    }
+    .credits-card {
+      background: rgba(31, 42, 58, 0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid #2d3a4a;
+      border-radius: 20px;
+      padding: 24px 36px;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .credit-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: #cbd5e1;
+    }
+    .credit-icon {
+      width: 24px;
+      text-align: center;
+      font-size: 20px;
+    }
+    .credit-text {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .credit-name {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
@@ -140,7 +178,7 @@
       );
     }
 
-    // ==================== PÁGINA INICIAL (TELEFONE CORRIGIDO) ====================
+    // ==================== PÁGINA INICIAL (CRÉDITOS CORRIGIDOS E PROFISSIONAIS) ====================
     function HomePage({ onNavigate }) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -150,25 +188,34 @@
             <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '48px', maxWidth: '600px' }}>
               Calcule o Quociente Eleitoral, Quociente Partidário e as sobras com precisão.
             </p>
-            <button onClick={onNavigate} style={{ padding: '16px 48px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: 600, cursor: 'pointer', background: 'linear-gradient(90deg, #22c55e, #eab308, #3b82f6)', color: '#000', marginBottom: '80px' }}>
+            <button onClick={onNavigate} style={{ padding: '16px 48px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: 600, cursor: 'pointer', background: 'linear-gradient(90deg, #22c55e, #eab308, #3b82f6)', color: '#000', marginBottom: '40px' }}>
               Gerar Simulação
             </button>
-            <div style={{ color: '#94a3b8', fontSize: '16px' }}>
-              <p style={{ marginBottom: '8px' }}>Desenvolvido por:</p>
-              <p style={{ fontWeight: 600, color: 'white', marginBottom: '4px' }}>Tiago Sant'ana</p>
-              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
-                <span>📞</span> <span style={{ color: '#cbd5e1' }}>(43) 99984-1190</span>
-              </p>
-              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <span>📍</span> <span style={{ color: '#cbd5e1' }}>@tiagosantana_1986</span>
-              </p>
+
+            {/* Créditos com design profissional e alinhado */}
+            <div className="credits-container">
+              <div className="credits-card">
+                <div className="credit-item">
+                  <span className="credit-icon">👤</span>
+                  <span className="credit-name">Tiago Sant'ana</span>
+                </div>
+                <div className="credit-item">
+                  <span className="credit-icon">📞</span>
+                  <span className="credit-text">(43) 99984-1190</span>
+                </div>
+                <div className="credit-item">
+                  <span className="credit-icon">📷</span>
+                  <span className="credit-text">@tiagosantana_1986</span>
+                </div>
+              </div>
+              <p style={{ color: '#64748b', fontSize: '13px', marginTop: '8px' }}>© 2026 ApuraVoto · Todos os direitos reservados</p>
             </div>
           </main>
         </div>
       );
     }
 
-    // ==================== CALCULADORA (DESIGN PROFISSIONAL) ====================
+    // ==================== CALCULADORA (MANTIDA) ====================
     function CalculadoraPage({ onBack }) {
       const [votosValidosTotais, setVotosValidosTotais] = useState('');
       const [vagas, setVagas] = useState('');
