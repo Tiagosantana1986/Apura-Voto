@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ApuraVoto · Simulador Eleitoral (Regras Oficiais TSE/STF)</title>
+  <title>ApuraVoto · Simulador Eleitoral (Regras Oficiais TSE)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
@@ -21,6 +21,7 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
+    // ==================== CONFIGURAÇÕES ====================
     const COLORS = { primary: "#22C55E", secondary: "#FBBF24", accent: "#3B82F6", dark: "#0A0A0A" };
     const LOGO_SIZE = { home: 80, header: 40 };
 
@@ -139,10 +140,11 @@
 
           const desempenhoMinimo10 = Math.ceil(qe * 0.1);
           const desempenhoMinimo20 = Math.ceil(qe * 0.2);
+          
           const partidosNumericos = partidos.map(p => ({
             ...p,
             votos: parseNumberInput(p.votos),
-            candidatos: p.candidatos.map(c => ({ ...c, votos: parseNumberInput(c.votos) }))
+            candidatos: p.candidatos.map(c => ({ ...c, votos: parseNumberInput(c.votos) })).sort((a,b) => b.votos - a.votos)
           }));
 
           // 1ª Fase: Quociente Partidário (QP)
@@ -153,12 +155,24 @@
 
           let vagasRestantes = vagasNum - distribuicao.reduce((acc, p) => acc + p.vagas, 0);
 
-          // 2ª Fase: Sobras 80/20 (partidos com 80% do QE e candidatos com 20% do QE)
+          // Função para tentar preencher uma vaga com um candidato apto
+          const tentarPreencherVaga = (partido, fase) => {
+            const minVotos = fase === 2 ? desempenhoMinimo20 : desempenhoMinimo10;
+            const candidatosAptos = partido.candidatos.filter(c => c.votos >= minVotos);
+            return candidatosAptos.length > partido.vagas;
+          };
+
+          // 2ª Fase: Sobras 80/20 (partidos com 80% do QE)
           if (vagasRestantes > 0) {
-            const partidosParaSobra = distribuicao.filter(p => p.votos >= qe * 0.8);
+            // Filtra partidos que podem participar E têm candidatos aptos para a 2ª fase
+            const partidosParaSobra = distribuicao.filter(p => 
+              p.votos >= qe * 0.8 && tentarPreencherVaga(p, 2)
+            );
+            
             while (vagasRestantes > 0 && partidosParaSobra.length > 0) {
               let melhorMedia = -1;
               let partidoIndex = -1;
+              
               partidosParaSobra.forEach((p, idx) => {
                 const media = p.votos / (p.vagas + 1);
                 if (media > melhorMedia) {
@@ -166,43 +180,72 @@
                   partidoIndex = idx;
                 }
               });
+              
               if (partidoIndex === -1) break;
+              
               const partido = partidosParaSobra[partidoIndex];
               const originalPartido = distribuicao.find(p => p.id === partido.id);
               originalPartido.vagas += 1;
               vagasRestantes--;
+              
+              // Se o partido não tem mais candidatos aptos para a 2ª fase, remove ele da lista
+              if (!tentarPreencherVaga(originalPartido, 2)) {
+                const idx = partidosParaSobra.findIndex(p => p.id === partido.id);
+                if (idx !== -1) partidosParaSobra.splice(idx, 1);
+              }
             }
           }
 
           // 3ª Fase: "Sobra das Sobras" (todos os partidos)
           if (vagasRestantes > 0) {
-            while (vagasRestantes > 0) {
+            // Filtra partidos que têm candidatos aptos para a 3ª fase (10% do QE)
+            const partidosParaSobra3 = distribuicao.filter(p => tentarPreencherVaga(p, 3));
+            
+            while (vagasRestantes > 0 && partidosParaSobra3.length > 0) {
               let melhorMedia = -1;
               let partidoIndex = -1;
-              distribuicao.forEach((p, idx) => {
+              
+              partidosParaSobra3.forEach((p, idx) => {
                 const media = p.votos / (p.vagas + 1);
                 if (media > melhorMedia) {
                   melhorMedia = media;
                   partidoIndex = idx;
                 }
               });
+              
               if (partidoIndex === -1) break;
-              distribuicao[partidoIndex].vagas += 1;
+              
+              const partido = partidosParaSobra3[partidoIndex];
+              const originalPartido = distribuicao.find(p => p.id === partido.id);
+              originalPartido.vagas += 1;
               vagasRestantes--;
+              
+              // Se o partido não tem mais candidatos aptos, remove ele da lista
+              if (!tentarPreencherVaga(originalPartido, 3)) {
+                const idx = partidosParaSobra3.findIndex(p => p.id === partido.id);
+                if (idx !== -1) partidosParaSobra3.splice(idx, 1);
+              }
             }
           }
 
           // Eleger candidatos (respeitando cláusulas de desempenho)
           const eleitos = [];
           distribuicao.forEach(partido => {
-            const candidatosOrdenados = [...partido.candidatos].sort((a, b) => b.votos - a.votos);
             let vagasPreenchidas = 0;
-            for (const c of candidatosOrdenados) {
+            let faseAtual = 1;
+            
+            for (const c of partido.candidatos) {
               if (vagasPreenchidas >= partido.vagas) break;
-              // 1ª e 3ª fases: 10% do QE; 2ª fase: 20% do QE (se o partido não atingiu 100% do QE)
-              const minVotos = (partido.votos >= qe) ? desempenhoMinimo10 : desempenhoMinimo20;
+              
+              // Determina a fase da vaga que está sendo preenchida
+              const qpVagas = Math.floor(partido.votos / qe);
+              if (vagasPreenchidas < qpVagas) faseAtual = 1;
+              else if (partido.votos >= qe * 0.8) faseAtual = 2;
+              else faseAtual = 3;
+              
+              const minVotos = faseAtual === 2 ? desempenhoMinimo20 : desempenhoMinimo10;
               if (c.votos >= minVotos) {
-                eleitos.push({ ...c, partido: partido.nome || 'SEM NOME' });
+                eleitos.push({ ...c, partido: partido.nome || 'SEM NOME', fase: faseAtual });
                 vagasPreenchidas++;
               }
             }
