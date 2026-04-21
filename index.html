@@ -68,7 +68,6 @@
       font-size: 13px;
       color: #94a3b8;
     }
-    /* Créditos */
     .credits-container {
       display: flex;
       flex-direction: column;
@@ -111,6 +110,25 @@
       font-size: 15px;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
+    }
+    /* Estilo para o conteúdo do PDF (será renderizado com fundo branco e texto escuro) */
+    .pdf-content {
+      background: white;
+      color: #1e293b;
+      padding: 24px;
+      border-radius: 16px;
+    }
+    .pdf-content h3, .pdf-content h4 {
+      color: #0b1a2b;
+    }
+    .pdf-content table {
+      color: #1e293b;
+    }
+    .pdf-content th {
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .pdf-content td {
+      border-bottom: 1px solid #e2e8f0;
     }
   </style>
 </head>
@@ -184,7 +202,7 @@
       );
     }
 
-    // ==================== PÁGINA INICIAL (COM "DESENVOLVIDO POR:") ====================
+    // ==================== PÁGINA INICIAL ====================
     function HomePage({ onNavigate }) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -198,7 +216,6 @@
               Gerar Simulação
             </button>
 
-            {/* Créditos com "Desenvolvido por:" */}
             <div className="credits-container">
               <div className="credits-card">
                 <div className="credit-header">Desenvolvido por:</div>
@@ -222,7 +239,7 @@
       );
     }
 
-    // ==================== CALCULADORA (MANTIDA) ====================
+    // ==================== CALCULADORA ====================
     function CalculadoraPage({ onBack }) {
       const [votosValidosTotais, setVotosValidosTotais] = useState('');
       const [vagas, setVagas] = useState('');
@@ -289,16 +306,38 @@
         } catch (e) { console.error(e); alert('Erro inesperado.'); }
       };
 
+      // GERA PDF (abre em nova aba, fundo branco)
       const gerarPDF = () => {
         const el = document.getElementById('resultado-pdf');
         if(!el) return;
-        html2canvas(el, { scale: 2, backgroundColor: '#0b1a2b' }).then(canvas => {
+        // Força fundo branco para captura
+        const originalBg = el.style.backgroundColor;
+        const originalColor = el.style.color;
+        el.style.backgroundColor = '#ffffff';
+        el.style.color = '#1e293b';
+        
+        html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+          // Restaura estilo original
+          el.style.backgroundColor = originalBg;
+          el.style.color = originalColor;
+          
+          const imgData = canvas.toDataURL('image/png');
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-          const w = 210, h = (canvas.height * w) / canvas.width;
-          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
-          pdf.save('resultado-apuravoto.pdf');
-        }).catch(e => { console.error(e); alert('Erro ao gerar PDF.'); });
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          
+          // Abre o PDF em nova aba (blob URL)
+          const pdfBlob = pdf.output('blob');
+          const blobUrl = URL.createObjectURL(pdfBlob);
+          window.open(blobUrl, '_blank');
+        }).catch(e => { 
+          el.style.backgroundColor = originalBg;
+          el.style.color = originalColor;
+          console.error(e); 
+          alert('Erro ao gerar PDF.'); 
+        });
       };
 
       return (
@@ -411,16 +450,16 @@
                   <div><span style={{ fontWeight: 600, color: 'white' }}>20% QE (2ª fase):</span> {resultado.min20} votos</div>
                 </div>
                 <div style={{ marginBottom: '28px' }}>
-                  <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px' }}>Distribuição de Vagas por Partido</h4>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px', color: 'white' }}>Distribuição de Vagas por Partido</h4>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', color: '#cbd5e1' }}>
                     <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '12px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Vagas</th></tr></thead>
                     <tbody>{resultado.distribuicao.map((p,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '10px 0' }}>{p.nome}</td><td>{p.votos}</td><td>{p.vagas}</td></tr>)}</tbody>
                   </table>
                 </div>
                 <div>
-                  <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px' }}>Candidatos Eleitos</h4>
-                  {resultado.eleitos.length === 0 ? <p>Nenhum candidato eleito.</p> : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px', color: 'white' }}>Candidatos Eleitos</h4>
+                  {resultado.eleitos.length === 0 ? <p style={{ color: '#cbd5e1' }}>Nenhum candidato eleito.</p> : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', color: '#cbd5e1' }}>
                       <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '12px 0', textAlign: 'left' }}>Candidato</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '12px 0', textAlign: 'left' }}>Forma</th></tr></thead>
                       <tbody>{resultado.eleitos.map((c,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '10px 0' }}>{c.nome}</td><td>{c.partido}</td><td>{c.votos}</td><td>{c.fase}</td></tr>)}</tbody>
                     </table>
@@ -428,7 +467,7 @@
                   {resultado.vagasNaoPreenchidas > 0 && <p style={{ marginTop: '20px', color: '#eab308' }}>⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s).</p>}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
-                  <button onClick={gerarPDF} className="btn-secondary" style={{ padding: '12px 28px' }}>📄 Baixar PDF</button>
+                  <button onClick={gerarPDF} className="btn-secondary" style={{ padding: '12px 28px' }}>📄 GERAR PDF</button>
                 </div>
               </div>
             )}
