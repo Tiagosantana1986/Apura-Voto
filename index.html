@@ -8,7 +8,7 @@
   <!-- Fonte Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS (para a calculadora, mas também usaremos algumas classes utilitárias) -->
+  <!-- Tailwind CSS (auxiliar) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- React + Babel -->
@@ -21,7 +21,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* Estilos base e customizações para harmonizar com o design enviado */
     * {
       margin: 0;
       padding: 0;
@@ -30,11 +29,10 @@
     }
 
     body {
-      background-color: #0b1a2b;  /* fundo mais escuro, conforme enviado */
+      background-color: #0b1a2b;
       color: #fff;
     }
 
-    /* Classes auxiliares */
     .gradient-brasil {
       background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6);
     }
@@ -52,12 +50,29 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
-    // ==================== COMPONENTES REUTILIZÁVEIS ====================
-    
-    // Logo em SVG (exatamente como você enviou)
-    function LogoSVG({ className = "" }) {
+    // ==================== UTILITÁRIOS ====================
+    const generateId = () => {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    };
+
+    const parseNumberInput = (value) => {
+      if (value === '' || value === undefined || value === null) return 0;
+      const cleaned = String(value).replace(/\./g, '').replace(/\D/g, '');
+      return Number(cleaned) || 0;
+    };
+
+    const calcularQE = (votosValidos, vagas) => {
+      if (votosValidos <= 0 || vagas <= 0) return 0;
+      const qeExato = votosValidos / vagas;
+      const decimal = qeExato - Math.floor(qeExato);
+      return decimal <= 0.5 ? Math.floor(qeExato) : Math.ceil(qeExato);
+    };
+
+    // ==================== COMPONENTES VISUAIS ====================
+    function LogoSVG({ className = "", width = 40, height = 40 }) {
       return (
-        <svg className={`logo-icon ${className}`} viewBox="0 0 100 100" width="40" height="40">
+        <svg className={className} viewBox="0 0 100 100" width={width} height={height}>
           <rect x="10" y="40" width="15" height="40" rx="3" fill="#3b82f6"/>
           <rect x="35" y="30" width="15" height="50" rx="3" fill="#22c55e"/>
           <rect x="60" y="15" width="15" height="65" rx="3" fill="#eab308"/>
@@ -66,12 +81,11 @@
       );
     }
 
-    // Componente Logo com texto
     function LogoCompleto() {
       return (
-        <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <LogoSVG />
-          <div className="logo-text" style={{
+          <div style={{
             fontSize: '26px',
             fontWeight: 700,
             background: 'linear-gradient(90deg, #22c55e, #3b82f6)',
@@ -84,10 +98,9 @@
       );
     }
 
-    // Foto de perfil redonda (substitua o src pela sua imagem)
     function ProfilePhoto() {
       return (
-        <div className="profile" style={{
+        <div style={{
           width: '45px',
           height: '45px',
           borderRadius: '50%',
@@ -95,11 +108,10 @@
           border: '2px solid #22c55e'
         }}>
           <img 
-            src="./IMG_7894.jpeg"   // <-- ALTERE AQUI para o caminho da sua foto
+            src="./IMG_7894.jpeg"   // <-- ALTERE AQUI para sua foto
             alt="Tiago Sant'ana"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => {
-              // fallback caso a imagem não exista
               e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23333\'/%3E%3Ctext x=\'50\' y=\'67\' font-size=\'50\' text-anchor=\'middle\' fill=\'%23aaa\' font-family=\'Arial\'%3ETS%3C/text%3E%3C/svg%3E';
             }}
           />
@@ -107,8 +119,7 @@
       );
     }
 
-    // Header padrão (usado em ambas as páginas)
-    function Header({ onBack, showBack = false }) {
+    function Header({ onBack, showBack = false, showProfile = true }) {
       return (
         <header style={{
           background: '#1f2a3a',
@@ -135,74 +146,279 @@
             )}
             <LogoCompleto />
           </div>
-          <ProfilePhoto />
+          {showProfile && <ProfilePhoto />}
         </header>
       );
     }
 
-    // ==================== PÁGINA INICIAL (conforme design enviado) ====================
+    // ==================== PÁGINA INICIAL (ATUALIZADA) ====================
     function HomePage({ onNavigate }) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <Header showBack={false} />
+          <Header showBack={false} showProfile={true} />
           
-          <main style={{ textAlign: 'center', padding: '80px 20px', flex: 1 }}>
-            <h1 style={{ fontSize: '40px', marginBottom: '20px', fontWeight: 700 }}>
+          <main style={{ textAlign: 'center', padding: '100px 20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h1 style={{ fontSize: '42px', marginBottom: '16px', fontWeight: 700 }}>
               Simule a distribuição<br />de vagas eleitorais
             </h1>
-            <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '40px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '48px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
               Calcule o Quociente Eleitoral, Quociente Partidário e as sobras com precisão.
             </p>
 
             <button 
               onClick={onNavigate}
-              className="btn"
               style={{
-                padding: '15px 40px',
+                padding: '16px 48px',
                 borderRadius: '12px',
                 border: 'none',
                 fontSize: '18px',
                 fontWeight: 600,
                 cursor: 'pointer',
                 background: 'linear-gradient(90deg, #22c55e, #eab308, #3b82f6)',
-                color: '#000'
+                color: '#000',
+                marginBottom: '80px'
               }}
             >
               Gerar Simulação
             </button>
 
-            <footer style={{ marginTop: '80px', color: '#94a3b8' }}>
-              <p>Desenvolvido com 💚 💛 💙 para o Brasil</p>
-              <p style={{ fontSize: '14px', marginTop: '10px' }}>
-                Tiago Sant'ana · (43) 99984-1190 · @tiagosantana_1986
+            <div style={{ color: '#94a3b8', fontSize: '16px' }}>
+              <p style={{ marginBottom: '8px' }}>Desenvolvido por:</p>
+              <p style={{ fontWeight: 600, color: 'white', marginBottom: '4px' }}>Tiago Sant'ana</p>
+              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
+                <span>📞</span> (43) 99984-1190
               </p>
-            </footer>
+              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <span>📍</span> @tiagosantana_1986
+              </p>
+            </div>
           </main>
         </div>
       );
     }
 
-    // ==================== CALCULADORA (mantida com lógica completa) ====================
+    // ==================== CALCULADORA (mantida) ====================
     function CalculadoraPage({ onBack }) {
-      // ... (todo o código da calculadora que já estava funcionando)
-      // Para não alongar, vou inserir a versão completa já testada.
-      // Como a lógica é extensa, confirme que usarei a versão mais recente e funcional.
+      const [votosValidosTotais, setVotosValidosTotais] = useState('');
+      const [vagas, setVagas] = useState('');
+      const [partidos, setPartidos] = useState([
+        { id: generateId(), nome: '', votos: '', candidatos: [{ id: generateId(), nome: '', votos: '' }] }
+      ]);
+      const [resultado, setResultado] = useState(null);
 
-      // (INSERIR AQUI O MESMO CÓDIGO DA CALCULADORA COMPLETA QUE ENVIEI ANTERIORMENTE)
-      // Para este exemplo, vou resumir a estrutura, mas na resposta final estará 100% completo.
+      const votosValidosNum = parseNumberInput(votosValidosTotais);
+      const vagasNum = parseNumberInput(vagas);
+      const qe = useMemo(() => calcularQE(votosValidosNum, vagasNum), [votosValidosNum, vagasNum]);
+
+      const adicionarPartido = () => setPartidos([...partidos, { id: generateId(), nome: '', votos: '', candidatos: [{ id: generateId(), nome: '', votos: '' }] }]);
+      const atualizarPartido = (partidoId, campo, valorStr) => setPartidos(partidos.map(p => p.id === partidoId ? { ...p, [campo]: campo === 'nome' ? valorStr.toUpperCase() : valorStr } : p));
+      const removerPartido = (partidoId) => { if (partidos.length === 1) return; setPartidos(partidos.filter(p => p.id !== partidoId)); };
+      const adicionarCandidato = (partidoId) => setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: [...p.candidatos, { id: generateId(), nome: '', votos: '' }] } : p));
+      const atualizarCandidato = (partidoId, candidatoId, campo, valorStr) => setPartidos(partidos.map(p => { if (p.id !== partidoId) return p; return { ...p, candidatos: p.candidatos.map(c => c.id === candidatoId ? { ...c, [campo]: campo === 'nome' ? valorStr.toUpperCase() : valorStr } : c) }; }));
+      const removerCandidato = (partidoId, candidatoId) => setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: p.candidatos.filter(c => c.id !== candidatoId) } : p));
+
+      const calcular = () => {
+        try {
+          if (votosValidosNum <= 0) return alert('❌ Votos válidos totais deve ser maior que zero.');
+          if (vagasNum <= 0) return alert('❌ Número de vagas deve ser maior que zero.');
+          if (qe === 0) return alert('❌ Não foi possível calcular o Quociente Eleitoral.');
+
+          const min10 = Math.ceil(qe * 0.1);
+          const min20 = Math.ceil(qe * 0.2);
+          
+          const partidosNum = partidos.map(p => ({
+            ...p,
+            votos: parseNumberInput(p.votos),
+            candidatos: p.candidatos.map(c => ({ ...c, votos: parseNumberInput(c.votos) })).sort((a,b) => b.votos - a.votos)
+          }));
+
+          let dist = partidosNum.map(p => ({ ...p, vagas: Math.floor(p.votos / qe) }));
+          let vagasRest = vagasNum - dist.reduce((acc, p) => acc + p.vagas, 0);
+
+          const temCandidatoApto = (p, fase) => p.candidatos.filter(c => c.votos >= (fase===2 ? min20 : min10)).length > p.vagas;
+
+          if (vagasRest > 0) {
+            let candidatos = dist.filter(p => p.votos >= qe * 0.8 && temCandidatoApto(p,2));
+            while (vagasRest > 0 && candidatos.length) {
+              let idx = -1, media = -1;
+              candidatos.forEach((p, i) => { const m = p.votos/(p.vagas+1); if(m>media){ media=m; idx=i; }});
+              if(idx===-1) break;
+              const p = candidatos[idx]; const orig = dist.find(x=>x.id===p.id); orig.vagas++; vagasRest--;
+              if(!temCandidatoApto(orig,2)) candidatos = candidatos.filter(x=>x.id!==p.id);
+            }
+          }
+
+          if (vagasRest > 0) {
+            let candidatos = dist.filter(p => temCandidatoApto(p,3));
+            while (vagasRest > 0 && candidatos.length) {
+              let idx = -1, media = -1;
+              candidatos.forEach((p, i) => { const m = p.votos/(p.vagas+1); if(m>media){ media=m; idx=i; }});
+              if(idx===-1) break;
+              const p = candidatos[idx]; const orig = dist.find(x=>x.id===p.id); orig.vagas++; vagasRest--;
+              if(!temCandidatoApto(orig,3)) candidatos = candidatos.filter(x=>x.id!==p.id);
+            }
+          }
+
+          const eleitos = [];
+          dist.forEach(p => {
+            let preenchidas = 0; const qpVagas = Math.floor(p.votos/qe);
+            for (const c of p.candidatos) {
+              if (preenchidas >= p.vagas) break;
+              let fase = 1; if (preenchidas >= qpVagas) fase = (p.votos >= qe*0.8) ? 2 : 3;
+              const min = fase===2 ? min20 : min10;
+              if (c.votos >= min) {
+                eleitos.push({ ...c, partido: p.nome||'SEM NOME', fase: fase===1?'QP':(fase===2?'Sobra 80/20':'Sobra das Sobras') });
+                preenchidas++;
+              }
+            }
+          });
+
+          setResultado({
+            qe, min10, min20,
+            distribuicao: dist.map(p => ({ nome: p.nome||'SEM NOME', votos: p.votos, vagas: p.vagas })),
+            eleitos,
+            vagasNaoPreenchidas: vagasNum - eleitos.length,
+          });
+        } catch (e) {
+          console.error(e); alert('Erro inesperado.');
+        }
+      };
+
+      const gerarPDF = () => {
+        const el = document.getElementById('resultado-pdf');
+        if(!el) return;
+        html2canvas(el, { scale: 2, backgroundColor: '#0b1a2b' }).then(canvas => {
+          const img = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          const w = 210, h = (canvas.height * w) / canvas.width;
+          pdf.addImage(img, 'PNG', 0, 0, w, h);
+          pdf.save('resultado-apuravoto.pdf');
+        }).catch(e => { console.error(e); alert('Erro ao gerar PDF.'); });
+      };
 
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b1a2b' }}>
-          <Header onBack={onBack} showBack={true} />
-          {/* ... restante da interface da calculadora (já com QP, fases, PDF) ... */}
+          <Header onBack={onBack} showBack={true} showProfile={false} />
+          
+          <main style={{ flex: 1, maxWidth: '1000px', width: '100%', margin: '0 auto', padding: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1' }}>Votos Válidos Totais</label>
+                <input type="text" inputMode="numeric" value={votosValidosTotais} onChange={(e) => setVotosValidosTotais(e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="Ex: 58119" />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1' }}>Vagas Disponíveis</label>
+                <input type="text" inputMode="numeric" value={vagas} onChange={(e) => setVagas(e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="Ex: 15" />
+              </div>
+            </div>
+
+            <div style={{ background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '20px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#22c55e' }}>📊 Quocientes</span>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>(atualizados em tempo real)</span>
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ background: '#0b1a2b', padding: '12px', borderRadius: '8px' }}>
+                  <span style={{ color: '#94a3b8' }}>Quociente Eleitoral (QE):</span>
+                  <span style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: '8px', color: '#eab308' }}>{qe || '-'}</span>
+                  {qe > 0 && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>10% do QE = {Math.ceil(qe * 0.1)} votos</div>}
+                </div>
+                <div style={{ background: '#0b1a2b', padding: '12px', borderRadius: '8px' }}>
+                  <span style={{ color: '#94a3b8' }}>Vagas a preencher:</span>
+                  <span style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: '8px' }}>{vagasNum || '-'}</span>
+                </div>
+              </div>
+
+              {qe > 0 && (
+                <div style={{ marginTop: '20px' }}>
+                  <h4 style={{ marginBottom: '8px', color: '#cbd5e1' }}>Quociente Partidário (QP) por Partido</h4>
+                  <div className="overflow-x-auto">
+                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '14px' }}>
+                      <thead><tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8' }}><th style={{ padding: '8px 0' }}>Partido</th><th style={{ padding: '8px 0' }}>Votos</th><th style={{ padding: '8px 0' }}>QP</th></tr></thead>
+                      <tbody>
+                        {partidos.map(p => { const v = parseNumberInput(p.votos); return (<tr key={p.id} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{p.nome || 'SEM NOME'}</td><td style={{ padding: '8px 0' }}>{v}</td><td style={{ padding: '8px 0', fontWeight: 'bold', color: '#22c55e' }}>{Math.floor(v / qe)}</td></tr>); })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {partidos.map((partido, idx) => (
+              <div key={partido.id} style={{ background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#22c55e' }}>Partido {idx + 1}</h2>
+                  {partidos.length > 1 && <button onClick={() => removerPartido(partido.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}>Remover</button>}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                  <div><label style={{ display: 'block', marginBottom: '4px', color: '#94a3b8' }}>Nome do Partido</label><input type="text" placeholder="Ex: PSD, PP" value={partido.nome} onChange={(e) => atualizarPartido(partido.id, 'nome', e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }} /></div>
+                  <div><label style={{ display: 'block', marginBottom: '4px', color: '#94a3b8' }}>Votos Totais</label><input type="text" inputMode="numeric" value={partido.votos} onChange={(e) => atualizarPartido(partido.id, 'votos', e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="0" /></div>
+                </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h3 style={{ fontWeight: 600 }}>Candidatos</h3>
+                    <button onClick={() => adicionarCandidato(partido.id)} style={{ background: '#3b82f6', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>+ Adicionar Candidato</button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '8px', color: '#94a3b8', fontSize: '14px', borderBottom: '1px solid #334155', paddingBottom: '8px' }}>
+                    <div>Nome</div><div>Votos</div>
+                  </div>
+                  {partido.candidatos.map(c => (
+                    <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px', alignItems: 'center' }}>
+                      <input type="text" placeholder="Nome" value={c.nome} onChange={(e) => atualizarCandidato(partido.id, c.id, 'nome', e.target.value)} style={{ padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }} />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input type="text" inputMode="numeric" value={c.votos} onChange={(e) => atualizarCandidato(partido.id, c.id, 'votos', e.target.value)} style={{ flex: 1, padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="0" />
+                        {partido.candidatos.length > 1 && <button onClick={() => removerCandidato(partido.id, c.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '20px', cursor: 'pointer' }}>✕</button>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <button onClick={adicionarPartido} style={{ width: '100%', padding: '14px', background: '#3b82f6', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600, cursor: 'pointer', marginBottom: '16px' }}>+ Adicionar Novo Partido</button>
+            <button onClick={calcular} className="gradient-brasil" style={{ width: '100%', padding: '16px', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', color: '#000' }}>Calcular Resultado Completo</button>
+
+            {resultado && (
+              <div id="resultado-pdf" style={{ background: '#1f2a3a', padding: '24px', borderRadius: '12px', marginTop: '24px' }}>
+                <h3 className="text-gradient" style={{ fontSize: '24px', marginBottom: '20px' }}>Resultado da Simulação</h3>
+                <div style={{ marginBottom: '20px' }}>
+                  <p><strong>Quociente Eleitoral (QE):</strong> {resultado.qe}</p>
+                  <p><strong>Cláusula 1ª/3ª fase (10% QE):</strong> {resultado.min10} votos</p>
+                  <p><strong>Cláusula 2ª fase (20% QE):</strong> {resultado.min20} votos</p>
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ marginBottom: '8px' }}>Distribuição de Vagas por Partido</h4>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '8px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Vagas</th></tr></thead>
+                    <tbody>{resultado.distribuicao.map((p,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{p.nome}</td><td>{p.votos}</td><td>{p.vagas}</td></tr>)}</tbody>
+                  </table>
+                </div>
+                <div>
+                  <h4 style={{ marginBottom: '8px' }}>Candidatos Eleitos</h4>
+                  {resultado.eleitos.length === 0 ? <p>Nenhum candidato eleito.</p> : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '8px 0', textAlign: 'left' }}>Candidato</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Forma de Eleição</th></tr></thead>
+                      <tbody>{resultado.eleitos.map((c,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{c.nome}</td><td>{c.partido}</td><td>{c.votos}</td><td>{c.fase}</td></tr>)}</tbody>
+                    </table>
+                  )}
+                  {resultado.vagasNaoPreenchidas > 0 && <p style={{ marginTop: '16px', color: '#eab308' }}>⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s) por falta de candidatos aptos.</p>}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                  <button onClick={gerarPDF} style={{ background: '#2563eb', border: 'none', color: 'white', padding: '10px 24px', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>📄 Baixar PDF</button>
+                </div>
+              </div>
+            )}
+          </main>
+          <footer style={{ textAlign: 'center', color: '#64748b', padding: '16px', borderTop: '1px solid #1e293b', fontSize: '12px' }}>
+            © 2026 ApuraVoto · Regras oficiais (TSE/STF)
+          </footer>
         </div>
       );
     }
 
-    // ==================== APP PRINCIPAL ====================
     function App() {
       const [pagina, setPagina] = useState('home');
-
       return (
         <>
           {pagina === 'home' && <HomePage onNavigate={() => setPagina('calculadora')} />}
