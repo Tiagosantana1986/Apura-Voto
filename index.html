@@ -4,44 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ApuraVoto · Simulador Eleitoral</title>
-
-  <!-- Fonte Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CSS (auxiliar) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- React + Babel -->
   <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
-    body {
-      background-color: #0b1a2b;
-      color: #fff;
-    }
-
-    .gradient-brasil {
-      background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6);
-    }
-    .text-gradient {
-      background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background-color: #0b1a2b; color: #fff; }
+    .gradient-brasil { background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6); }
+    .text-gradient { background: linear-gradient(90deg, #22c55e, #eab308, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
   </style>
 </head>
 <body>
@@ -70,9 +44,9 @@
     };
 
     // ==================== COMPONENTES VISUAIS ====================
-    function LogoSVG({ className = "", width = 40, height = 40 }) {
+    function LogoSVG({ width = 40, height = 40 }) {
       return (
-        <svg className={className} viewBox="0 0 100 100" width={width} height={height}>
+        <svg viewBox="0 0 100 100" width={width} height={height}>
           <rect x="10" y="40" width="15" height="40" rx="3" fill="#3b82f6"/>
           <rect x="35" y="30" width="15" height="50" rx="3" fill="#22c55e"/>
           <rect x="60" y="15" width="15" height="65" rx="3" fill="#eab308"/>
@@ -85,13 +59,7 @@
       return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <LogoSVG />
-          <div style={{
-            fontSize: '26px',
-            fontWeight: 700,
-            background: 'linear-gradient(90deg, #22c55e, #3b82f6)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
+          <div style={{ fontSize: '26px', fontWeight: 700, background: 'linear-gradient(90deg, #22c55e, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             ApuraVoto
           </div>
         </div>
@@ -100,20 +68,9 @@
 
     function ProfilePhoto() {
       return (
-        <div style={{
-          width: '45px',
-          height: '45px',
-          borderRadius: '50%',
-          overflow: 'hidden',
-          border: '2px solid #22c55e'
-        }}>
-          <img 
-            src="./IMG_7894.jpeg"   // <-- ALTERE AQUI para sua foto
-            alt="Tiago Sant'ana"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={(e) => {
-              e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23333\'/%3E%3Ctext x=\'50\' y=\'67\' font-size=\'50\' text-anchor=\'middle\' fill=\'%23aaa\' font-family=\'Arial\'%3ETS%3C/text%3E%3C/svg%3E';
-            }}
+        <div style={{ width: '45px', height: '45px', borderRadius: '50%', overflow: 'hidden', border: '2px solid #22c55e' }}>
+          <img src="./IMG_7894.jpeg" alt="Tiago Sant'ana" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => { e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23333\'/%3E%3Ctext x=\'50\' y=\'67\' font-size=\'50\' text-anchor=\'middle\' fill=\'%23aaa\'%3ETS%3C/text%3E%3C/svg%3E'; }}
           />
         </div>
       );
@@ -121,29 +78,9 @@
 
     function Header({ onBack, showBack = false, showProfile = true }) {
       return (
-        <header style={{
-          background: '#1f2a3a',
-          padding: '20px 40px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
+        <header style={{ background: '#1f2a3a', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {showBack && (
-              <button 
-                onClick={onBack} 
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#cbd5e1',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  fontWeight: 500
-                }}
-              >
-                ← Voltar
-              </button>
-            )}
+            {showBack && <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#cbd5e1', fontSize: '16px', cursor: 'pointer' }}>← Voltar</button>}
             <LogoCompleto />
           </div>
           {showProfile && <ProfilePhoto />}
@@ -151,59 +88,35 @@
       );
     }
 
-    // ==================== PÁGINA INICIAL (ATUALIZADA) ====================
+    // ==================== PÁGINA INICIAL ====================
     function HomePage({ onNavigate }) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <Header showBack={false} showProfile={true} />
-          
-          <main style={{ textAlign: 'center', padding: '100px 20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h1 style={{ fontSize: '42px', marginBottom: '16px', fontWeight: 700 }}>
-              Simule a distribuição<br />de vagas eleitorais
-            </h1>
-            <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '48px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+          <Header showProfile={true} />
+          <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '20px' }}>
+            <h1 style={{ fontSize: '42px', fontWeight: 700, marginBottom: '16px' }}>Simule a distribuição<br />de vagas eleitorais</h1>
+            <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '48px', maxWidth: '600px' }}>
               Calcule o Quociente Eleitoral, Quociente Partidário e as sobras com precisão.
             </p>
-
-            <button 
-              onClick={onNavigate}
-              style={{
-                padding: '16px 48px',
-                borderRadius: '12px',
-                border: 'none',
-                fontSize: '18px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: 'linear-gradient(90deg, #22c55e, #eab308, #3b82f6)',
-                color: '#000',
-                marginBottom: '80px'
-              }}
-            >
+            <button onClick={onNavigate} style={{ padding: '16px 48px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: 600, cursor: 'pointer', background: 'linear-gradient(90deg, #22c55e, #eab308, #3b82f6)', color: '#000', marginBottom: '80px' }}>
               Gerar Simulação
             </button>
-
             <div style={{ color: '#94a3b8', fontSize: '16px' }}>
               <p style={{ marginBottom: '8px' }}>Desenvolvido por:</p>
               <p style={{ fontWeight: 600, color: 'white', marginBottom: '4px' }}>Tiago Sant'ana</p>
-              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
-                <span>📞</span> (43) 99984-1190
-              </p>
-              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <span>📍</span> @tiagosantana_1986
-              </p>
+              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}><span>📞</span> (43) 99984-1190</p>
+              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><span>📍</span> @tiagosantana_1986</p>
             </div>
           </main>
         </div>
       );
     }
 
-    // ==================== CALCULADORA (mantida) ====================
+    // ==================== CALCULADORA COMPLETA ====================
     function CalculadoraPage({ onBack }) {
       const [votosValidosTotais, setVotosValidosTotais] = useState('');
       const [vagas, setVagas] = useState('');
-      const [partidos, setPartidos] = useState([
-        { id: generateId(), nome: '', votos: '', candidatos: [{ id: generateId(), nome: '', votos: '' }] }
-      ]);
+      const [partidos, setPartidos] = useState([{ id: generateId(), nome: '', votos: '', candidatos: [{ id: generateId(), nome: '', votos: '' }] }]);
       const [resultado, setResultado] = useState(null);
 
       const votosValidosNum = parseNumberInput(votosValidosTotais);
@@ -211,27 +124,20 @@
       const qe = useMemo(() => calcularQE(votosValidosNum, vagasNum), [votosValidosNum, vagasNum]);
 
       const adicionarPartido = () => setPartidos([...partidos, { id: generateId(), nome: '', votos: '', candidatos: [{ id: generateId(), nome: '', votos: '' }] }]);
-      const atualizarPartido = (partidoId, campo, valorStr) => setPartidos(partidos.map(p => p.id === partidoId ? { ...p, [campo]: campo === 'nome' ? valorStr.toUpperCase() : valorStr } : p));
-      const removerPartido = (partidoId) => { if (partidos.length === 1) return; setPartidos(partidos.filter(p => p.id !== partidoId)); };
-      const adicionarCandidato = (partidoId) => setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: [...p.candidatos, { id: generateId(), nome: '', votos: '' }] } : p));
-      const atualizarCandidato = (partidoId, candidatoId, campo, valorStr) => setPartidos(partidos.map(p => { if (p.id !== partidoId) return p; return { ...p, candidatos: p.candidatos.map(c => c.id === candidatoId ? { ...c, [campo]: campo === 'nome' ? valorStr.toUpperCase() : valorStr } : c) }; }));
-      const removerCandidato = (partidoId, candidatoId) => setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: p.candidatos.filter(c => c.id !== candidatoId) } : p));
+      const atualizarPartido = (id, campo, valor) => setPartidos(partidos.map(p => p.id === id ? { ...p, [campo]: campo === 'nome' ? valor.toUpperCase() : valor } : p));
+      const removerPartido = (id) => { if (partidos.length === 1) return; setPartidos(partidos.filter(p => p.id !== id)); };
+      const adicionarCandidato = (id) => setPartidos(partidos.map(p => p.id === id ? { ...p, candidatos: [...p.candidatos, { id: generateId(), nome: '', votos: '' }] } : p));
+      const atualizarCandidato = (pid, cid, campo, valor) => setPartidos(partidos.map(p => p.id === pid ? { ...p, candidatos: p.candidatos.map(c => c.id === cid ? { ...c, [campo]: campo === 'nome' ? valor.toUpperCase() : valor } : c) } : p));
+      const removerCandidato = (pid, cid) => setPartidos(partidos.map(p => p.id === pid ? { ...p, candidatos: p.candidatos.filter(c => c.id !== cid) } : p));
 
       const calcular = () => {
         try {
           if (votosValidosNum <= 0) return alert('❌ Votos válidos totais deve ser maior que zero.');
           if (vagasNum <= 0) return alert('❌ Número de vagas deve ser maior que zero.');
-          if (qe === 0) return alert('❌ Não foi possível calcular o Quociente Eleitoral.');
+          if (qe === 0) return alert('❌ Quociente Eleitoral não calculado.');
 
-          const min10 = Math.ceil(qe * 0.1);
-          const min20 = Math.ceil(qe * 0.2);
-          
-          const partidosNum = partidos.map(p => ({
-            ...p,
-            votos: parseNumberInput(p.votos),
-            candidatos: p.candidatos.map(c => ({ ...c, votos: parseNumberInput(c.votos) })).sort((a,b) => b.votos - a.votos)
-          }));
-
+          const min10 = Math.ceil(qe * 0.1), min20 = Math.ceil(qe * 0.2);
+          const partidosNum = partidos.map(p => ({ ...p, votos: parseNumberInput(p.votos), candidatos: p.candidatos.map(c => ({ ...c, votos: parseNumberInput(c.votos) })).sort((a,b) => b.votos - a.votos) }));
           let dist = partidosNum.map(p => ({ ...p, vagas: Math.floor(p.votos / qe) }));
           let vagasRest = vagasNum - dist.reduce((acc, p) => acc + p.vagas, 0);
 
@@ -247,7 +153,6 @@
               if(!temCandidatoApto(orig,2)) candidatos = candidatos.filter(x=>x.id!==p.id);
             }
           }
-
           if (vagasRest > 0) {
             let candidatos = dist.filter(p => temCandidatoApto(p,3));
             while (vagasRest > 0 && candidatos.length) {
@@ -266,33 +171,22 @@
               if (preenchidas >= p.vagas) break;
               let fase = 1; if (preenchidas >= qpVagas) fase = (p.votos >= qe*0.8) ? 2 : 3;
               const min = fase===2 ? min20 : min10;
-              if (c.votos >= min) {
-                eleitos.push({ ...c, partido: p.nome||'SEM NOME', fase: fase===1?'QP':(fase===2?'Sobra 80/20':'Sobra das Sobras') });
-                preenchidas++;
-              }
+              if (c.votos >= min) { eleitos.push({ ...c, partido: p.nome||'SEM NOME', fase: fase===1?'QP':(fase===2?'Sobra 80/20':'Sobra das Sobras') }); preenchidas++; }
             }
           });
 
-          setResultado({
-            qe, min10, min20,
-            distribuicao: dist.map(p => ({ nome: p.nome||'SEM NOME', votos: p.votos, vagas: p.vagas })),
-            eleitos,
-            vagasNaoPreenchidas: vagasNum - eleitos.length,
-          });
-        } catch (e) {
-          console.error(e); alert('Erro inesperado.');
-        }
+          setResultado({ qe, min10, min20, distribuicao: dist.map(p => ({ nome: p.nome||'SEM NOME', votos: p.votos, vagas: p.vagas })), eleitos, vagasNaoPreenchidas: vagasNum - eleitos.length });
+        } catch (e) { console.error(e); alert('Erro inesperado.'); }
       };
 
       const gerarPDF = () => {
         const el = document.getElementById('resultado-pdf');
         if(!el) return;
         html2canvas(el, { scale: 2, backgroundColor: '#0b1a2b' }).then(canvas => {
-          const img = canvas.toDataURL('image/png');
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
           const w = 210, h = (canvas.height * w) / canvas.width;
-          pdf.addImage(img, 'PNG', 0, 0, w, h);
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
           pdf.save('resultado-apuravoto.pdf');
         }).catch(e => { console.error(e); alert('Erro ao gerar PDF.'); });
       };
@@ -300,76 +194,43 @@
       return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b1a2b' }}>
           <Header onBack={onBack} showBack={true} showProfile={false} />
-          
           <main style={{ flex: 1, maxWidth: '1000px', width: '100%', margin: '0 auto', padding: '24px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1' }}>Votos Válidos Totais</label>
-                <input type="text" inputMode="numeric" value={votosValidosTotais} onChange={(e) => setVotosValidosTotais(e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="Ex: 58119" />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1' }}>Vagas Disponíveis</label>
-                <input type="text" inputMode="numeric" value={vagas} onChange={(e) => setVagas(e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="Ex: 15" />
-              </div>
+              <div><label style={{ color: '#cbd5e1' }}>Votos Válidos Totais</label><input type="text" inputMode="numeric" value={votosValidosTotais} onChange={(e) => setVotosValidosTotais(e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="Ex: 58119" /></div>
+              <div><label style={{ color: '#cbd5e1' }}>Vagas Disponíveis</label><input type="text" inputMode="numeric" value={vagas} onChange={(e) => setVagas(e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="Ex: 15" /></div>
             </div>
 
             <div style={{ background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '20px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#22c55e' }}>📊 Quocientes</span>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>(atualizados em tempo real)</span>
-              </h3>
+              <h3 style={{ fontSize: '20px', marginBottom: '16px' }}><span style={{ color: '#22c55e' }}>📊 Quocientes</span> <span style={{ fontSize: '12px', color: '#94a3b8' }}>(atualizados em tempo real)</span></h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div style={{ background: '#0b1a2b', padding: '12px', borderRadius: '8px' }}>
-                  <span style={{ color: '#94a3b8' }}>Quociente Eleitoral (QE):</span>
-                  <span style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: '8px', color: '#eab308' }}>{qe || '-'}</span>
-                  {qe > 0 && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>10% do QE = {Math.ceil(qe * 0.1)} votos</div>}
-                </div>
-                <div style={{ background: '#0b1a2b', padding: '12px', borderRadius: '8px' }}>
-                  <span style={{ color: '#94a3b8' }}>Vagas a preencher:</span>
-                  <span style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: '8px' }}>{vagasNum || '-'}</span>
-                </div>
+                <div style={{ background: '#0b1a2b', padding: '12px', borderRadius: '8px' }}><span style={{ color: '#94a3b8' }}>QE:</span> <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#eab308' }}>{qe || '-'}</span>{qe > 0 && <div style={{ fontSize: '12px', color: '#64748b' }}>10% = {Math.ceil(qe * 0.1)} votos</div>}</div>
+                <div style={{ background: '#0b1a2b', padding: '12px', borderRadius: '8px' }}><span style={{ color: '#94a3b8' }}>Vagas:</span> <span style={{ fontSize: '24px', fontWeight: 'bold' }}>{vagasNum || '-'}</span></div>
               </div>
-
               {qe > 0 && (
                 <div style={{ marginTop: '20px' }}>
-                  <h4 style={{ marginBottom: '8px', color: '#cbd5e1' }}>Quociente Partidário (QP) por Partido</h4>
-                  <div className="overflow-x-auto">
-                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '14px' }}>
-                      <thead><tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8' }}><th style={{ padding: '8px 0' }}>Partido</th><th style={{ padding: '8px 0' }}>Votos</th><th style={{ padding: '8px 0' }}>QP</th></tr></thead>
-                      <tbody>
-                        {partidos.map(p => { const v = parseNumberInput(p.votos); return (<tr key={p.id} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{p.nome || 'SEM NOME'}</td><td style={{ padding: '8px 0' }}>{v}</td><td style={{ padding: '8px 0', fontWeight: 'bold', color: '#22c55e' }}>{Math.floor(v / qe)}</td></tr>); })}
-                      </tbody>
-                    </table>
-                  </div>
+                  <h4 style={{ color: '#cbd5e1', marginBottom: '8px' }}>Quociente Partidário (QP)</h4>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                    <thead><tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8' }}><th style={{ padding: '8px 0', textAlign: 'left' }}>Partido</th><th>Votos</th><th>QP</th></tr></thead>
+                    <tbody>{partidos.map(p => { const v = parseNumberInput(p.votos); return (<tr key={p.id} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{p.nome || 'SEM NOME'}</td><td>{v}</td><td style={{ fontWeight: 'bold', color: '#22c55e' }}>{Math.floor(v / qe)}</td></tr>); })}</tbody>
+                  </table>
                 </div>
               )}
             </div>
 
-            {partidos.map((partido, idx) => (
-              <div key={partido.id} style={{ background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#22c55e' }}>Partido {idx + 1}</h2>
-                  {partidos.length > 1 && <button onClick={() => removerPartido(partido.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}>Remover</button>}
-                </div>
+            {partidos.map((p, idx) => (
+              <div key={p.id} style={{ background: '#1f2a3a', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}><h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#22c55e' }}>Partido {idx+1}</h2>{partidos.length>1 && <button onClick={() => removerPartido(p.id)} style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}>Remover</button>}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-                  <div><label style={{ display: 'block', marginBottom: '4px', color: '#94a3b8' }}>Nome do Partido</label><input type="text" placeholder="Ex: PSD, PP" value={partido.nome} onChange={(e) => atualizarPartido(partido.id, 'nome', e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }} /></div>
-                  <div><label style={{ display: 'block', marginBottom: '4px', color: '#94a3b8' }}>Votos Totais</label><input type="text" inputMode="numeric" value={partido.votos} onChange={(e) => atualizarPartido(partido.id, 'votos', e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="0" /></div>
+                  <div><label style={{ color: '#94a3b8' }}>Nome</label><input type="text" value={p.nome} onChange={(e) => atualizarPartido(p.id, 'nome', e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }} placeholder="Ex: PSD" /></div>
+                  <div><label style={{ color: '#94a3b8' }}>Votos Totais</label><input type="text" inputMode="numeric" value={p.votos} onChange={(e) => atualizarPartido(p.id, 'votos', e.target.value)} style={{ width: '100%', padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="0" /></div>
                 </div>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <h3 style={{ fontWeight: 600 }}>Candidatos</h3>
-                    <button onClick={() => adicionarCandidato(partido.id)} style={{ background: '#3b82f6', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>+ Adicionar Candidato</button>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '8px', color: '#94a3b8', fontSize: '14px', borderBottom: '1px solid #334155', paddingBottom: '8px' }}>
-                    <div>Nome</div><div>Votos</div>
-                  </div>
-                  {partido.candidatos.map(c => (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><h3 style={{ fontWeight: 600 }}>Candidatos</h3><button onClick={() => adicionarCandidato(p.id)} style={{ background: '#3b82f6', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>+ Adicionar</button></div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '8px', color: '#94a3b8', fontSize: '14px', borderBottom: '1px solid #334155', paddingBottom: '8px' }}><div>Nome</div><div>Votos</div></div>
+                  {p.candidatos.map(c => (
                     <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px', alignItems: 'center' }}>
-                      <input type="text" placeholder="Nome" value={c.nome} onChange={(e) => atualizarCandidato(partido.id, c.id, 'nome', e.target.value)} style={{ padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }} />
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input type="text" inputMode="numeric" value={c.votos} onChange={(e) => atualizarCandidato(partido.id, c.id, 'votos', e.target.value)} style={{ flex: 1, padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="0" />
-                        {partido.candidatos.length > 1 && <button onClick={() => removerCandidato(partido.id, c.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '20px', cursor: 'pointer' }}>✕</button>}
-                      </div>
+                      <input type="text" value={c.nome} onChange={(e) => atualizarCandidato(p.id, c.id, 'nome', e.target.value)} style={{ padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }} placeholder="Nome" />
+                      <div style={{ display: 'flex', gap: '8px' }}><input type="text" inputMode="numeric" value={c.votos} onChange={(e) => atualizarCandidato(p.id, c.id, 'votos', e.target.value)} style={{ flex: 1, padding: '12px', background: '#0b1a2b', border: '1px solid #334155', borderRadius: '8px', color: 'white' }} placeholder="0" />{p.candidatos.length>1 && <button onClick={() => removerCandidato(p.id, c.id)} style={{ color: '#f87171', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>}</div>
                     </div>
                   ))}
                 </div>
@@ -382,49 +243,21 @@
             {resultado && (
               <div id="resultado-pdf" style={{ background: '#1f2a3a', padding: '24px', borderRadius: '12px', marginTop: '24px' }}>
                 <h3 className="text-gradient" style={{ fontSize: '24px', marginBottom: '20px' }}>Resultado da Simulação</h3>
-                <div style={{ marginBottom: '20px' }}>
-                  <p><strong>Quociente Eleitoral (QE):</strong> {resultado.qe}</p>
-                  <p><strong>Cláusula 1ª/3ª fase (10% QE):</strong> {resultado.min10} votos</p>
-                  <p><strong>Cláusula 2ª fase (20% QE):</strong> {resultado.min20} votos</p>
-                </div>
-                <div style={{ marginBottom: '20px' }}>
-                  <h4 style={{ marginBottom: '8px' }}>Distribuição de Vagas por Partido</h4>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '8px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Vagas</th></tr></thead>
-                    <tbody>{resultado.distribuicao.map((p,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{p.nome}</td><td>{p.votos}</td><td>{p.vagas}</td></tr>)}</tbody>
-                  </table>
-                </div>
-                <div>
-                  <h4 style={{ marginBottom: '8px' }}>Candidatos Eleitos</h4>
-                  {resultado.eleitos.length === 0 ? <p>Nenhum candidato eleito.</p> : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead><tr style={{ borderBottom: '1px solid #334155' }}><th style={{ padding: '8px 0', textAlign: 'left' }}>Candidato</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Partido</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Votos</th><th style={{ padding: '8px 0', textAlign: 'left' }}>Forma de Eleição</th></tr></thead>
-                      <tbody>{resultado.eleitos.map((c,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td style={{ padding: '8px 0' }}>{c.nome}</td><td>{c.partido}</td><td>{c.votos}</td><td>{c.fase}</td></tr>)}</tbody>
-                    </table>
-                  )}
-                  {resultado.vagasNaoPreenchidas > 0 && <p style={{ marginTop: '16px', color: '#eab308' }}>⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s) por falta de candidatos aptos.</p>}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-                  <button onClick={gerarPDF} style={{ background: '#2563eb', border: 'none', color: 'white', padding: '10px 24px', borderRadius: '8px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>📄 Baixar PDF</button>
-                </div>
+                <div style={{ marginBottom: '20px' }}><p><strong>QE:</strong> {resultado.qe}</p><p><strong>10% QE:</strong> {resultado.min10} votos</p><p><strong>20% QE:</strong> {resultado.min20} votos</p></div>
+                <div style={{ marginBottom: '20px' }}><h4>Vagas por Partido</h4><table style={{ width: '100%', borderCollapse: 'collapse' }}><thead><tr style={{ borderBottom: '1px solid #334155' }}><th>Partido</th><th>Votos</th><th>Vagas</th></tr></thead><tbody>{resultado.distribuicao.map((p,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td>{p.nome}</td><td>{p.votos}</td><td>{p.vagas}</td></tr>)}</tbody></table></div>
+                <div><h4>Candidatos Eleitos</h4>{resultado.eleitos.length === 0 ? <p>Nenhum eleito.</p> : <table style={{ width: '100%', borderCollapse: 'collapse' }}><thead><tr style={{ borderBottom: '1px solid #334155' }}><th>Candidato</th><th>Partido</th><th>Votos</th><th>Forma</th></tr></thead><tbody>{resultado.eleitos.map((c,i) => <tr key={i} style={{ borderBottom: '1px solid #1e293b' }}><td>{c.nome}</td><td>{c.partido}</td><td>{c.votos}</td><td>{c.fase}</td></tr>)}</tbody></table>}{resultado.vagasNaoPreenchidas > 0 && <p style={{ marginTop: '16px', color: '#eab308' }}>⚠️ {resultado.vagasNaoPreenchidas} vaga(s) não preenchida(s).</p>}</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}><button onClick={gerarPDF} style={{ background: '#2563eb', border: 'none', color: 'white', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer' }}>📄 Baixar PDF</button></div>
               </div>
             )}
           </main>
-          <footer style={{ textAlign: 'center', color: '#64748b', padding: '16px', borderTop: '1px solid #1e293b', fontSize: '12px' }}>
-            © 2026 ApuraVoto · Regras oficiais (TSE/STF)
-          </footer>
+          <footer style={{ textAlign: 'center', color: '#64748b', padding: '16px', borderTop: '1px solid #1e293b', fontSize: '12px' }}>© 2026 ApuraVoto · Regras oficiais (TSE/STF)</footer>
         </div>
       );
     }
 
     function App() {
       const [pagina, setPagina] = useState('home');
-      return (
-        <>
-          {pagina === 'home' && <HomePage onNavigate={() => setPagina('calculadora')} />}
-          {pagina === 'calculadora' && <CalculadoraPage onBack={() => setPagina('home')} />}
-        </>
-      );
+      return <>{pagina === 'home' ? <HomePage onNavigate={() => setPagina('calculadora')} /> : <CalculadoraPage onBack={() => setPagina('home')} />}</>;
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
