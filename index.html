@@ -25,7 +25,7 @@
     const COLORS = { primary: "#22C55E", secondary: "#FBBF24", accent: "#3B82F6", dark: "#0A0A0A" };
     const LOGO_SIZE = { home: 80, header: 40 };
 
-    // Logo em SVG (sem dependência externa)
+    // Logo SVG embutida
     function Logo({ className = "", size = "home" }) {
       const height = LOGO_SIZE[size] || 48;
       return (
@@ -117,21 +117,26 @@
         const novoId = crypto.randomUUID?.() || Date.now().toString() + Math.random();
         setPartidos([...partidos, { id: novoId, nome: '', votos: 0, candidatos: [{ id: crypto.randomUUID?.() || Date.now()+1, nome: '', votos: 0 }] }]);
       };
+
       const atualizarPartido = (partidoId, campo, valorStr) => {
-        const valor = campo === 'votos' ? parseNumberInput(valorStr) : valorStr;
+        const valor = campo === 'votos' ? parseNumberInput(valorStr) : (campo === 'nome' ? valorStr.toUpperCase() : valorStr);
         setPartidos(partidos.map(p => p.id === partidoId ? { ...p, [campo]: valor } : p));
       };
+
       const removerPartido = (partidoId) => {
         if (partidos.length === 1) return;
         setPartidos(partidos.filter(p => p.id !== partidoId));
       };
+
       const adicionarCandidato = (partidoId) => {
         setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: [...p.candidatos, { id: crypto.randomUUID?.() || Date.now()+Math.random(), nome: '', votos: 0 }] } : p));
       };
+
       const atualizarCandidato = (partidoId, candidatoId, campo, valorStr) => {
-        const valor = campo === 'votos' ? parseNumberInput(valorStr) : valorStr;
+        const valor = campo === 'votos' ? parseNumberInput(valorStr) : (campo === 'nome' ? valorStr.toUpperCase() : valorStr);
         setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: p.candidatos.map(c => c.id === candidatoId ? { ...c, [campo]: valor } : c) } : p));
       };
+
       const removerCandidato = (partidoId, candidatoId) => {
         setPartidos(partidos.map(p => p.id === partidoId ? { ...p, candidatos: p.candidatos.filter(c => c.id !== candidatoId) } : p));
       };
@@ -238,8 +243,18 @@
                   {partidos.length > 1 && <button onClick={() => removerPartido(partido.id)} className="text-red-400 hover:text-red-300 text-sm">Remover</button>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><label className="block text-sm text-gray-400 mb-1">Nome do Partido</label><input type="text" placeholder="Ex: PSD, PP, MDB, PSB" value={partido.nome} onChange={(e) => atualizarPartido(partido.id, 'nome', e.target.value)} className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" /></div>
-                  <div><label className="block text-sm text-gray-400 mb-1">Votos Totais do Partido</label><input type="text" inputMode="numeric" value={partido.votos === 0 ? '' : partido.votos} onChange={(e) => atualizarPartido(partido.id, 'votos', e.target.value)} className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="0" /></div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Nome do Partido</label>
+                    <input type="text" placeholder="Ex: PSD, PP, MDB, PSB" value={partido.nome} 
+                      onChange={(e) => atualizarPartido(partido.id, 'nome', e.target.value)} 
+                      className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none uppercase" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Votos Totais do Partido</label>
+                    <input type="text" inputMode="numeric" value={partido.votos === 0 ? '' : partido.votos} 
+                      onChange={(e) => atualizarPartido(partido.id, 'votos', e.target.value)} 
+                      className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="0" />
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -249,9 +264,13 @@
                   <div className="grid grid-cols-2 gap-4 mb-2 text-sm font-medium text-gray-400 border-b border-gray-800 pb-2"><div>Nome</div><div>Votos</div></div>
                   {partido.candidatos.map((candidato) => (
                     <div key={candidato.id} className="grid grid-cols-2 gap-4 mb-3 items-center">
-                      <input type="text" placeholder="Nome" value={candidato.nome} onChange={(e) => atualizarCandidato(partido.id, candidato.id, 'nome', e.target.value)} className="p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" />
+                      <input type="text" placeholder="Nome" value={candidato.nome} 
+                        onChange={(e) => atualizarCandidato(partido.id, candidato.id, 'nome', e.target.value)} 
+                        className="p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none uppercase" />
                       <div className="flex items-center gap-2">
-                        <input type="text" inputMode="numeric" value={candidato.votos === 0 ? '' : candidato.votos} onChange={(e) => atualizarCandidato(partido.id, candidato.id, 'votos', e.target.value)} className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="0" />
+                        <input type="text" inputMode="numeric" value={candidato.votos === 0 ? '' : candidato.votos} 
+                          onChange={(e) => atualizarCandidato(partido.id, candidato.id, 'votos', e.target.value)} 
+                          className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="0" />
                         {partido.candidatos.length > 1 && <button onClick={() => removerCandidato(partido.id, candidato.id)} className="text-red-500 hover:text-red-400 text-xl">✕</button>}
                       </div>
                     </div>
